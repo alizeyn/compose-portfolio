@@ -1,5 +1,12 @@
 package com.alizeyn.site.data
 
+import com.alizeyn.site.resources.Res
+import com.alizeyn.site.resources.logo_foxyfitness
+import com.alizeyn.site.resources.logo_neshan
+import com.alizeyn.site.resources.logo_ohana
+import com.alizeyn.site.resources.logo_shopreme
+import org.jetbrains.compose.resources.DrawableResource
+
 /** A run of text inside a paragraph. `accent` marks the highlighted phrases. */
 data class Segment(val text: String, val accent: Boolean = false)
 
@@ -11,115 +18,168 @@ private fun accent(text: String) = Segment(text, accent = true)
 object Profile {
     const val firstName = "Ali"
     const val lastName = "Zeynali"
-    const val role = "Art Stuff"
+    const val role = "Android Engineer"
+    const val focus = "Design systems"
     const val email = "the.ali.zeynali@gmail.com"
     const val linkedin = "https://www.linkedin.com/in/alizeynali/"
     const val github = "https://github.com/alizeyn"
     const val location = "Vienna, Austria"
-    val tagline = listOf("I can design everything —", "well mostly apps —", "but hey, challenge me!")
-    val shout = listOf("Wanna be my career", "switch hero?")
+    const val tagline = "Ten years of Android, from Java to Jetpack Compose. I build the UI components other teams build with."
+    const val shoutTitle = "Fluent in both languages."
+    const val shoutBody =
+        "I translate UX intent into component APIs, and technical constraints back into design conversations. " +
+            "Nearly a decade on Android teams, a product designer's eye, and a library author's habits: " +
+            "clean API surfaces, documentation, changelogs, and no surprise breaking changes."
 }
 
 val about: List<Paragraph> = listOf(
     listOf(
-        plain("I've been a mobile engineer (mostly Android) for the last 8–9 years, but I've never been able to let go of my "),
-        accent("artsy"),
-        plain(" side. Now I'm thinking of switching sides!"),
+        plain("I've been building Android apps for about ten years: Java to Kotlin, XML to "),
+        accent("Jetpack Compose"),
+        plain(", for products with more than 10 million users. The constant through all of it: the UI layer is where I do my best work."),
     ),
     listOf(
-        plain("I was always better at "),
-        accent("product design"),
-        plain(". The creative energy was always trying to get out! Feels great to shape a product look and feel!"),
+        plain("At shopreme I learned to think like a "),
+        accent("library author"),
+        plain(": a clean public API surface with the internals kept internal, parity with iOS, deprecation instead of breaking changes, and documentation and changelogs people actually read. That is exactly the mindset a design-system component library needs."),
     ),
     listOf(
-        plain("After all these years, I've built a solid understanding of user experience and the standards of different platforms, plus that extra twist of creativity."),
+        plain("I care about design as much as code. I prototype, I argue about spacing and motion, and I read a "),
+        accent("Figma"),
+        plain(" file as fluently as a stack trace. Over the past year I've folded AI tooling into everyday work, from prototyping to implementation."),
     ),
     listOf(
-        plain("And of course I can implement the prototypes when needed. Well, I spent (almost) a decade doing this sh*t!"),
+        plain("This site is a small proof: "),
+        accent("Compose Multiplatform drawn with Material 3"),
+        plain(", adaptive navigation per window size class, light and dark schemes, and a GitHub Actions pipeline that ships every push."),
     ),
-    listOf(accent("I'm flipping the coin — engineer to designer!")),
 )
-
-enum class Tone { Orange, Blue, Maroon }
 
 data class Role(
     val company: String,
+    val title: String,
     val period: String,
     val arrangement: String,
     val place: String,
-    val tone: Tone,
-    val body: List<String>,
+    val logo: DrawableResource,
+    val summary: String,
+    val highlights: List<String>,
+    val stack: List<String>,
 )
 
 val roles: List<Role> = listOf(
     Role(
         company = "Foxyfitness",
+        title = "Android Engineer",
         period = "Jan 2026 – Present",
         arrangement = "Hybrid",
         place = "Linz",
-        tone = Tone.Orange,
-        body = listOf(
-            "I've learned how to integrate AI into everyday work. From prototyping to implementation!",
-            "With more responsibilities in a small start-up, I noticed that I have a stronger taste for product design & UI/UX (rather than development).",
+        logo = Res.drawable.logo_foxyfitness,
+        summary = "Fitness start-up. A small team, so everyone wears several hats.",
+        highlights = listOf(
+            "Integrated AI tooling into the everyday workflow, from prototyping to implementation.",
+            "A growing share of product design and UI/UX work alongside Android development.",
         ),
+        stack = listOf("Kotlin", "Jetpack Compose", "AI-assisted workflows"),
     ),
     Role(
         company = "Ohana",
+        title = "Senior Android Developer",
         period = "Dec 2023 – Aug 2025",
         arrangement = "Remote",
         place = "Linz",
-        tone = Tone.Blue,
-        body = listOf(
-            "My baby steps into the start-up game started with Ohana. Working with a lovely small team, came to appreciate the communication skills even more than before. Talking to the product designer, all the devs and marketing. I got familiar with different stages of start-up growth in practice. I sharpened my engineering skills while learning how a product comes together!",
+        logo = Res.drawable.logo_ohana,
+        summary = "Parental-control app that helps families build healthy screen-time routines.",
+        highlights = listOf(
+            "Compose everywhere: daily feature work, a migration of the whole app to Jetpack Navigation, and shared styles and components adopted across modules.",
+            "Replaced Firebase Dynamic Links ahead of the shutdown: evaluated SDK and API alternatives, migrated the existing deep links, led pricing talks with providers.",
+            "Built two-factor authentication for Parent Mode with delivery to every guardian's device.",
+            "Implemented paywalls on Qonversion and Google Play subscriptions, and supported the move from subscriptions to freemium.",
+            "Reworked module dependencies for better separation of concerns and maintainability.",
         ),
+        stack = listOf("Kotlin", "Jetpack Compose", "Jetpack Navigation", "Hilt", "Coroutines & Flow"),
     ),
     Role(
         company = "shopreme",
+        title = "Android Developer",
         period = "Nov 2021 – Nov 2023",
         arrangement = "On-site",
         place = "Graz",
-        tone = Tone.Blue,
-        body = listOf(
-            "A mid-sized rather mature start-up. My first experience working in Austria! I got familiar with ecosystem and how things work around here.",
-            "I did quite a lot of UI-heavy & animation-heavy work at shopreme!",
+        logo = Res.drawable.logo_shopreme,
+        summary = "Scan & Go SDK and self-checkout platform used by brands like Rewe, Auchan and ALDI.",
+        highlights = listOf(
+            "SDK mindset: a clean public API surface with internals kept internal, API parity with iOS, and a deprecation policy so patch releases never break anyone.",
+            "Wrote the documentation and changelogs that shipped with every release.",
+            "Set up CI pipelines for the SDK and several customer apps; introduced Jetpack Compose for new projects.",
+            "UI- and animation-heavy work across the SDK and the self-checkout terminal app.",
+            "Migrated the last large Java classes to Kotlin and the database from GreenDAO to Room; built GPS-based store detection without beacons.",
         ),
+        stack = listOf("Kotlin", "SDK & API design", "Jetpack Compose", "CI pipelines", "Room"),
     ),
     Role(
         company = "Neshan",
+        title = "Android Developer",
         period = "Sep 2017 – Oct 2021",
         arrangement = "Hybrid",
-        place = "Iran",
-        tone = Tone.Maroon,
-        body = listOf(
-            "My very first serious position, started as a junior dev and went on from there. I saw a product take shape from 0 to 5M installs! And all the changes that happened with it!",
-            "Here I dealt with UI/UX challenges on small screens, right-to-left layout (Persian and Arabic support).",
+        place = "Mashhad",
+        logo = Res.drawable.logo_neshan,
+        summary = "Maps and navigation used by 10 million people in Iran, localised down to the speed bumps.",
+        highlights = listOf(
+            "Right-to-left from day one: Persian and Arabic layouts and typography on small screens, and the UI/UX challenges that come with them.",
+            "Watched the product grow from zero to 5M+ installs; moved the codebase to MVVM along the way.",
+            "Designed a hybrid GPS on LocationManager and Fused Location for faster fixes and fewer bad positions; cut battery use with WorkManager.",
+            "Reached 98.3% crash-free users through Firebase crash analysis; built the push-notification system and location-based instant search.",
+            "Onboarded new Android developers with merge-request rules, code style and tooling; mentored students at Ferdowsi University.",
         ),
+        stack = listOf("Kotlin", "Java", "RTL layouts", "MVVM", "RxJava", "Map SDKs"),
     ),
 )
 
 const val rolesFootnote =
-    "I'm leaving out the technical details, and mostly focusing on the product aspect and human aspect of what I did in the past. Naturally, as it's more relevant to the position I'm applying for. In case you're interested you can check out all the details on my LinkedIn."
+    "Product and people first here. The full technical detail, stack by stack, is on LinkedIn."
+
+data class SkillGroup(val title: String, val skills: List<String>)
+
+val toolkit: List<SkillGroup> = listOf(
+    SkillGroup("Build with", listOf("Kotlin", "Jetpack Compose", "Material 3", "Coroutines & Flow", "Hilt", "Room", "Compose Multiplatform")),
+    SkillGroup("Keep it honest", listOf("Unit & UI tests", "Code review", "GitHub Actions", "GitLab CI", "Jenkins", "Clean architecture", "SOLID")),
+    SkillGroup("Design side", listOf("Design systems", "Component APIs", "Figma", "RTL layouts", "Prototyping", "Motion")),
+    SkillGroup("Also", listOf("Java", "RxJava", "SDK docs & changelogs", "Git", "Agile")),
+)
 
 data class Faq(val question: String, val answer: List<String>)
 
 val faqs: List<Faq> = listOf(
     Faq(
-        question = "What did you study again?",
-        answer = listOf("Well, software engineering. But I've always kept an interest in design and visual art."),
+        question = "Engineer or designer?",
+        answer = listOf(
+            "Both, and that's the point. Ten years of Android engineering, with product design as the side that kept growing.",
+            "In a design-system team that isn't a split, it's the job: translating UX intent into component APIs and back.",
+        ),
+    ),
+    Faq(
+        question = "What's your Compose story?",
+        answer = listOf(
+            "Introduced it for new projects at shopreme, then used it daily at Ohana, including a full Jetpack Navigation migration and shared component styles across modules.",
+            "This site is Compose too, drawn with Material 3 and compiled to WebAssembly.",
+        ),
+    ),
+    Faq(
+        question = "RTL, really?",
+        answer = listOf(
+            "Four years on Neshan, a Persian-language app for 10 million people. Right-to-left layouts, Arabic-script typography and small screens were the daily normal.",
+        ),
     ),
     Faq(
         question = "Language stuff?",
-        answer = listOf("My German skills are like B1.", "English is fluent,", "and my mother tongue is Persian."),
+        answer = listOf("My German is around B1.", "English is fluent,", "and my mother tongue is Persian."),
+    ),
+    Faq(
+        question = "What did you study again?",
+        answer = listOf("B.Sc. in Software Engineering, Ferdowsi University of Mashhad. Design and visual art never stopped being a side study."),
     ),
     Faq(
         question = "Do you have, like hobbies?",
-        answer = listOf("I enjoy photography, nature and music. I do a bit of each and trying to expand my horizons here and there. Huge fan of tea!"),
-    ),
-    Faq(
-        question = "Right, and what is this career change about? Isn't being a mobile eng. good enough?",
-        answer = listOf(
-            "It surely is great! I just think I'm moving more towards what satisfies me the most and where my main taste, talent and passion are!",
-            "My past experiences are just giving me more strength!",
-        ),
+        answer = listOf("Generative art, producing music, photography, hiking. Huge fan of tea, and coffee when the tea runs out."),
     ),
 )

@@ -24,6 +24,7 @@ import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.SuggestionChip
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -34,10 +35,12 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.unit.dp
 import com.alizeyn.site.WidthClass
 import com.alizeyn.site.data.Profile
+import com.alizeyn.site.data.toolkit
 import com.alizeyn.site.resources.Res
 import com.alizeyn.site.resources.hero_filmshop
 import com.alizeyn.site.resources.ic_open_in_new
 import com.alizeyn.site.resources.ic_palette
+import com.alizeyn.site.resources.ic_work
 import org.jetbrains.compose.resources.painterResource
 
 @Composable
@@ -53,6 +56,22 @@ fun HomeScreen(widthClass: WidthClass, onEmail: () -> Unit, onAbout: () -> Unit)
             HeroCopy(Modifier.fillMaxWidth(), onEmail, onAbout)
         }
         ShoutCard()
+        Toolkit()
+    }
+}
+
+@Composable
+private fun Toolkit() {
+    Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+        SectionHeader("Toolkit", "What I build with")
+        toolkit.forEach { group ->
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text(group.title, style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    group.skills.forEach { SuggestionChip(onClick = {}, label = { Text(it) }) }
+                }
+            }
+        }
     }
 }
 
@@ -78,6 +97,17 @@ private fun HeroCopy(modifier: Modifier, onEmail: () -> Unit, onAbout: () -> Uni
                 label = { Text(Profile.role) },
                 leadingIcon = {
                     Icon(
+                        painterResource(Res.drawable.ic_work),
+                        contentDescription = null,
+                        modifier = Modifier.size(AssistChipDefaults.IconSize),
+                    )
+                },
+            )
+            AssistChip(
+                onClick = onAbout,
+                label = { Text(Profile.focus) },
+                leadingIcon = {
+                    Icon(
                         painterResource(Res.drawable.ic_palette),
                         contentDescription = null,
                         modifier = Modifier.size(AssistChipDefaults.IconSize),
@@ -97,7 +127,7 @@ private fun HeroCopy(modifier: Modifier, onEmail: () -> Unit, onAbout: () -> Uni
             Text(Profile.lastName, style = MaterialTheme.typography.displayLarge, color = MaterialTheme.colorScheme.primary)
         }
         Text(
-            Profile.tagline.joinToString(" "),
+            Profile.tagline,
             style = MaterialTheme.typography.titleLarge,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
@@ -132,11 +162,8 @@ private fun ShoutCard() {
         modifier = Modifier.fillMaxWidth(),
     ) {
         Column(Modifier.padding(28.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            Text(Profile.shout.joinToString(" "), style = MaterialTheme.typography.headlineMedium)
-            Text(
-                "Eight-odd years of shipping mobile apps, now pointed at product design. The portfolio is the poster set; this is the same story told in Material.",
-                style = MaterialTheme.typography.bodyLarge,
-            )
+            Text(Profile.shoutTitle, style = MaterialTheme.typography.headlineMedium)
+            Text(Profile.shoutBody, style = MaterialTheme.typography.bodyLarge)
         }
     }
 }

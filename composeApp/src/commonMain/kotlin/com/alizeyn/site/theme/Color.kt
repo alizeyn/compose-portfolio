@@ -79,15 +79,3 @@ val DarkColors = darkColorScheme(
     surfaceDim = Color(0xFF131318),
     surfaceBright = Color(0xFF39393F),
 )
-
-/** Company accents from the Experience poster, mapped to tonal container pairs. */
-data class ToneColors(val container: Color, val onContainer: Color)
-
-fun toneOrange(dark: Boolean) =
-    if (dark) ToneColors(Color(0xFF7B2A08), Color(0xFFFFDBCF)) else ToneColors(Color(0xFFFFDBCF), Color(0xFF9A3A12))
-
-fun toneBlue(dark: Boolean) =
-    if (dark) ToneColors(Color(0xFF2E1FBE), Color(0xFFE2DDFF)) else ToneColors(Color(0xFFE2DDFF), Color(0xFF0300C3))
-
-fun toneMaroon(dark: Boolean) =
-    if (dark) ToneColors(Color(0xFF7A1C1C), Color(0xFFFFDAD6)) else ToneColors(Color(0xFFFFDAD6), Color(0xFF670000))

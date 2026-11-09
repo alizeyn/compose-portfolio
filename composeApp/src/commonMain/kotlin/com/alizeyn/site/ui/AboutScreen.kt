@@ -25,16 +25,18 @@ import com.alizeyn.site.resources.ic_camera
 import com.alizeyn.site.resources.ic_language
 import com.alizeyn.site.resources.ic_palette
 import com.alizeyn.site.resources.ic_school
+import com.alizeyn.site.resources.ic_work
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
 
 private data class Fact(val icon: DrawableResource, val title: String, val body: String)
 
 private val facts = listOf(
-    Fact(Res.drawable.ic_school, "Studied", "Software engineering, with design and visual art never far away."),
-    Fact(Res.drawable.ic_palette, "Leaning into", "Product design, UI/UX and the look and feel of a product."),
+    Fact(Res.drawable.ic_school, "Studied", "B.Sc. Software Engineering, Ferdowsi University of Mashhad, 2015–2019."),
+    Fact(Res.drawable.ic_palette, "Leaning into", "Component libraries, Material 3, and the handshake between design and engineering."),
+    Fact(Res.drawable.ic_work, "Mentoring", "Taught Android at Ferdowsi University; onboarded new developers at Neshan."),
     Fact(Res.drawable.ic_language, "Languages", "Persian natively, English fluently, German at B1."),
-    Fact(Res.drawable.ic_camera, "Off hours", "Photography, nature, music and a lot of tea."),
+    Fact(Res.drawable.ic_camera, "Off hours", "Generative art, producing music, photography, hiking, and a lot of tea."),
 )
 
 @Composable
@@ -46,7 +48,7 @@ fun AboutScreen(widthClass: WidthClass) {
             height = if (widthClass == WidthClass.Compact) 200.dp else 280.dp,
             alignment = Alignment.BottomCenter,
         )
-        SectionHeader("About", "Engineer to designer")
+        SectionHeader("About", "Engineer with a designer's eye")
         if (widthClass == WidthClass.Expanded) {
             Row(horizontalArrangement = Arrangement.spacedBy(32.dp)) {
                 Column(Modifier.weight(3f), verticalArrangement = Arrangement.spacedBy(16.dp)) {
