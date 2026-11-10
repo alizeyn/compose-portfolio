@@ -1,5 +1,7 @@
 package com.alizeyn.site.ui
 
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -28,9 +30,14 @@ import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.SuggestionChip
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.ColorMatrix
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.unit.Dp
@@ -121,19 +128,36 @@ private fun HeroChips(onWork: () -> Unit, stacked: Boolean) {
     }
 }
 
-/** Head-and-shoulders crop in the extra-large rounded rect, with a drifting gradient stroke. */
+/**
+ * Head-and-shoulders crop in the extra-large rounded rect, with a drifting gradient stroke. The
+ * black-and-white photo is duotoned to the theme: deep green shadows on the paper tone in light,
+ * near-black shadows with mint highlights in dark. The two ends animate with the theme toggle.
+ */
 @Composable
 private fun Portrait(size: Dp) {
     val shape = MaterialTheme.shapes.extraLarge
+    val dark = MaterialTheme.colorScheme.background.luminance() < 0.5f
+    val shadow by animateColorAsState(if (dark) Color(0xFF071009) else Color(0xFF0B3D27), tween(450), label = "shadow")
+    val highlight by animateColorAsState(if (dark) Color(0xFFBFECD8) else Color(0xFFF1FDF0), tween(450), label = "highlight")
     Image(
         painter = painterResource(Res.drawable.hero_portrait),
         contentDescription = "Portrait of Ali, smiling, in front of a fern print",
         contentScale = ContentScale.Crop,
+        colorFilter = ColorFilter.colorMatrix(duotone(shadow, highlight)),
         modifier = Modifier
             .size(size)
             .border(3.dp, shimmerBrush(), shape)
             .padding(3.dp)
             .clip(shape),
+    )
+}
+
+/** Maps luminance onto the ramp from [shadow] to [highlight]. */
+private fun duotone(shadow: Color, highlight: Color): ColorMatrix {
+    fun row(d: Float, l: Float) = floatArrayOf((l - d) * 0.299f, (l - d) * 0.587f, (l - d) * 0.114f, 0f, d * 255f)
+    return ColorMatrix(
+        row(shadow.red, highlight.red) + row(shadow.green, highlight.green) + row(shadow.blue, highlight.blue) +
+            floatArrayOf(0f, 0f, 0f, 1f, 0f),
     )
 }
 
