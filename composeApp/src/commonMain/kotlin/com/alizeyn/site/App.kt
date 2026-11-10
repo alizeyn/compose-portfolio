@@ -20,10 +20,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.outlined.Email
 import androidx.compose.material.icons.outlined.Home
-import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -56,7 +54,6 @@ import com.alizeyn.site.resources.ic_help
 import com.alizeyn.site.resources.ic_light_mode
 import com.alizeyn.site.resources.ic_work
 import com.alizeyn.site.theme.SiteTheme
-import com.alizeyn.site.ui.AboutScreen
 import com.alizeyn.site.ui.ContactScreen
 import com.alizeyn.site.ui.FaqScreen
 import com.alizeyn.site.ui.HomeScreen
@@ -74,12 +71,12 @@ fun widthClassFor(width: Dp): WidthClass = when {
 
 enum class Destination(val label: String, val route: String) {
     Home("Home", "home"),
-    About("About", "about"),
     Work("Work", "work"),
     Faq("FAQ", "faq"),
     Contact("Contact", "contact");
 
     companion object {
+        /** `about` used to be its own tab; it now lives on Home. */
         fun fromRoute(route: String): Destination = entries.firstOrNull { it.route == route } ?: Home
     }
 }
@@ -88,7 +85,6 @@ enum class Destination(val label: String, val route: String) {
 private fun DestinationIcon(destination: Destination, selected: Boolean) {
     when (destination) {
         Destination.Home -> Icon(if (selected) Icons.Filled.Home else Icons.Outlined.Home, contentDescription = null)
-        Destination.About -> Icon(if (selected) Icons.Filled.Person else Icons.Outlined.Person, contentDescription = null)
         Destination.Work -> Icon(painterResource(Res.drawable.ic_work), contentDescription = null)
         Destination.Faq -> Icon(painterResource(Res.drawable.ic_help), contentDescription = null)
         Destination.Contact -> Icon(if (selected) Icons.Filled.Email else Icons.Outlined.Email, contentDescription = null)
@@ -244,8 +240,7 @@ private fun Content(
     ) { target ->
         Column(Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
             when (target) {
-                Destination.Home -> HomeScreen(widthClass, onEmail = onEmail, onAbout = { onDestination(Destination.About) })
-                Destination.About -> AboutScreen(widthClass)
+                Destination.Home -> HomeScreen(widthClass, onEmail = onEmail, onWork = { onDestination(Destination.Work) })
                 Destination.Work -> WorkScreen(widthClass)
                 Destination.Faq -> FaqScreen(widthClass)
                 Destination.Contact -> ContactScreen(widthClass, onEmail = onEmail)

@@ -24,7 +24,7 @@ composeApp/src/
     data/Cv.kt              all copy, in one place
     theme/                  M3 colour schemes, shape scale, type scale
     ui/Common.kt            Page container, section header, banner, accent paragraphs
-    ui/*Screen.kt           Home, About, Work, FAQ, Contact
+    ui/*Screen.kt           Home (with About), Work, FAQ, Contact
   commonMain/composeResources/drawable/   photographs and vector icons
   wasmJsMain/kotlin/.../main.kt           ComposeViewport entry point
   wasmJsMain/resources/   index.html shell, styles.css, favicon
