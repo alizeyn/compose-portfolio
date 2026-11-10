@@ -47,7 +47,7 @@ fun ContactScreen(widthClass: WidthClass, onEmail: () -> Unit) {
                 text = { Text("Email me") },
                 containerColor = MaterialTheme.colorScheme.primaryContainer,
                 contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                modifier = Modifier.hoverLift(scale = 1.04f).clip(MaterialTheme.shapes.large).sheen(),
+                modifier = Modifier.hoverLift().clip(MaterialTheme.shapes.large).sheen(),
             )
         }
         Reveal(delayMillis = 240) {

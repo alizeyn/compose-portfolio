@@ -9,6 +9,9 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -51,8 +54,23 @@ import org.jetbrains.compose.resources.painterResource
 fun WorkScreen(widthClass: WidthClass) {
     Page(widthClass) {
         Reveal { SectionHeader("Work", "Ten years, four teams") }
-        Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-            roles.forEachIndexed { i, role -> Reveal(delayMillis = i * 70) { RoleCard(role) } }
+        if (widthClass == WidthClass.Expanded) {
+            // Two cards per row on desktop; rows stretch so both cards share a height.
+            Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                roles.chunked(2).forEachIndexed { rowIndex, pair ->
+                    Row(Modifier.height(IntrinsicSize.Max), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                        pair.forEachIndexed { i, role ->
+                            Reveal(Modifier.weight(1f).fillMaxHeight(), delayMillis = (rowIndex * 2 + i) * 70) {
+                                RoleCard(role, Modifier.fillMaxHeight())
+                            }
+                        }
+                    }
+                }
+            }
+        } else {
+            Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                roles.forEachIndexed { i, role -> Reveal(delayMillis = i * 70) { RoleCard(role) } }
+            }
         }
         Text(
             rolesFootnote,
@@ -85,7 +103,7 @@ private fun AppCard(app: App, frameWidth: Dp, onOpen: () -> Unit) {
                 screenshot = app.screenshot,
                 contentDescription = "${app.name} on a Pixel",
                 width = frameWidth,
-                modifier = Modifier.hoverLift(scale = 1f, lift = 6.dp).clickable(onClick = onOpen),
+                modifier = Modifier.hoverLift(lift = 6.dp).clickable(onClick = onOpen),
             )
             Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(2.dp)) {
                 Text(app.name, style = MaterialTheme.typography.titleMedium, textAlign = TextAlign.Center)
@@ -102,9 +120,9 @@ private fun AppCard(app: App, frameWidth: Dp, onOpen: () -> Unit) {
 }
 
 @Composable
-private fun RoleCard(role: Role) {
+private fun RoleCard(role: Role, modifier: Modifier = Modifier) {
     val uriHandler = LocalUriHandler.current
-    ElevatedCard(Modifier.fillMaxWidth().hoverLift()) {
+    ElevatedCard(modifier.fillMaxWidth().hoverLift()) {
         Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             // Logo, company and title open the company's LinkedIn page.
             Row(
@@ -118,7 +136,6 @@ private fun RoleCard(role: Role) {
                 Box(
                     Modifier
                         .size(52.dp)
-                        .hoverLift(scale = 1.1f, lift = 0.dp)
                         .clip(MaterialTheme.shapes.medium)
                         .background(MaterialTheme.colorScheme.surfaceContainerHighest),
                     contentAlignment = Alignment.Center,
@@ -167,7 +184,7 @@ private fun RoleCard(role: Role) {
                 }
             }
             FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                role.stack.forEach { SuggestionChip(onClick = {}, label = { Text(it) }, modifier = Modifier.hoverLift(scale = 1.06f, lift = 1.dp)) }
+                role.stack.forEach { SuggestionChip(onClick = {}, label = { Text(it) }, modifier = Modifier.hoverLift(lift = 1.dp)) }
             }
         }
     }

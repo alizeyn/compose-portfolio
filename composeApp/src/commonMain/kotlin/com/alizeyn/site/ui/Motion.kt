@@ -93,20 +93,15 @@ fun Reveal(
     )
 }
 
-/** Pointer hover lifts the element slightly: a small scale and rise on a soft spring. */
+/** Pointer hover raises the element by [lift] on a soft spring. No scaling: it reads as a nudge, not a zoom. */
 @Composable
-fun Modifier.hoverLift(scale: Float = 1.015f, lift: Dp = 3.dp): Modifier {
+fun Modifier.hoverLift(lift: Dp = 3.dp): Modifier {
     val interaction = remember { MutableInteractionSource() }
     val hovered by interaction.collectIsHoveredAsState()
-    val s by animateFloatAsState(if (hovered) scale else 1f, spring(stiffness = Spring.StiffnessMediumLow), label = "hoverScale")
     val y by animateDpAsState(if (hovered) -lift else 0.dp, spring(stiffness = Spring.StiffnessMediumLow), label = "hoverLift")
     return this
         .hoverable(interaction)
-        .graphicsLayer {
-            scaleX = s
-            scaleY = s
-            translationY = y.toPx()
-        }
+        .graphicsLayer { translationY = y.toPx() }
 }
 
 /** A soft highlight that sweeps across the content every few seconds. */

@@ -131,7 +131,7 @@ fun LabScreen(widthClass: WidthClass) {
 
 @Composable
 private fun LabCard(demo: LabDemo, widthClass: WidthClass) {
-    ElevatedCard(Modifier.fillMaxWidth().hoverLift(scale = 1.006f, lift = 2.dp)) {
+    ElevatedCard(Modifier.fillMaxWidth().hoverLift(lift = 2.dp)) {
         if (widthClass == WidthClass.Expanded) {
             Row(Modifier.padding(20.dp), horizontalArrangement = Arrangement.spacedBy(28.dp)) {
                 Column(Modifier.weight(2f), verticalArrangement = Arrangement.spacedBy(10.dp)) {

@@ -221,7 +221,7 @@ private fun Toolkit() {
                 FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     group.skills.forEachIndexed { i, skill ->
                         Reveal(pop = true, delayMillis = groupIndex * 60 + i * 35) {
-                            SuggestionChip(onClick = {}, label = { Text(skill) }, modifier = Modifier.hoverLift(scale = 1.06f, lift = 1.dp))
+                            SuggestionChip(onClick = {}, label = { Text(skill) }, modifier = Modifier.hoverLift(lift = 1.dp))
                         }
                     }
                 }
