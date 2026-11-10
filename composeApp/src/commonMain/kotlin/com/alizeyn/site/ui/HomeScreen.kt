@@ -18,8 +18,6 @@ import androidx.compose.material3.AssistChip
 import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -65,7 +63,7 @@ private val facts = listOf(
 fun HomeScreen(widthClass: WidthClass, onEmail: () -> Unit, onWork: () -> Unit) {
     Page(widthClass) {
         Hero(widthClass, onEmail, onWork)
-        Reveal { ShoutCard() }
+        Reveal { DesignSystemCard(widthClass) }
         About(widthClass)
         Toolkit()
     }
@@ -166,23 +164,6 @@ private fun HeroCopy(modifier: Modifier, onEmail: () -> Unit, onWork: () -> Unit
             }
             OutlinedButton(onClick = onWork) { Text("See my work") }
         }
-        }
-    }
-}
-
-@Composable
-private fun ShoutCard() {
-    Card(
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.primaryContainer,
-            contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-        ),
-        shape = MaterialTheme.shapes.extraLarge,
-        modifier = Modifier.fillMaxWidth().hoverLift().clip(MaterialTheme.shapes.extraLarge).sheen(),
-    ) {
-        Column(Modifier.padding(28.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            Text(Profile.shoutTitle, style = MaterialTheme.typography.headlineMedium)
-            Text(Profile.shoutBody, style = MaterialTheme.typography.bodyLarge)
         }
     }
 }

@@ -1,0 +1,269 @@
+package com.alizeyn.site.ui
+
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Slider
+import androidx.compose.material3.Switch
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.geometry.RoundRect
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.graphics.drawscope.rotate
+import androidx.compose.ui.graphics.drawscope.translate
+import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
+import com.alizeyn.site.WidthClass
+import com.alizeyn.site.theme.AndroidGreen
+
+/**
+ * A small specimen sheet of this very page's design system: colour roles, shape and type
+ * scales, a handful of live Material 3 controls, and a bugdroid you can wave with the slider.
+ * Everything reads from [MaterialTheme], so it cross-fades with the theme toggle.
+ */
+@Composable
+fun DesignSystemCard(widthClass: WidthClass) {
+    var wave by remember { mutableFloatStateOf(0.35f) }
+
+    Card(
+        shape = MaterialTheme.shapes.extraLarge,
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
+        modifier = Modifier.fillMaxWidth().hoverLift(scale = 1.008f),
+    ) {
+        if (widthClass == WidthClass.Compact) {
+            Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                Eyebrow()
+                Palette()
+                Row(horizontalArrangement = Arrangement.spacedBy(16.dp), verticalAlignment = Alignment.CenterVertically) {
+                    Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(14.dp)) {
+                        ShapeScale()
+                        TypeRamp()
+                    }
+                    Bugdroid(wave = wave, size = 88.dp)
+                }
+                Controls(wave = wave, onWave = { wave = it })
+            }
+        } else {
+            Row(Modifier.padding(20.dp), horizontalArrangement = Arrangement.spacedBy(28.dp)) {
+                Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(14.dp)) {
+                    Eyebrow()
+                    Palette()
+                    if (widthClass == WidthClass.Expanded) {
+                        Row(horizontalArrangement = Arrangement.spacedBy(24.dp), verticalAlignment = Alignment.Bottom) {
+                            ShapeScale()
+                            TypeRamp()
+                        }
+                    } else {
+                        ShapeScale()
+                        TypeRamp()
+                    }
+                }
+                Column(
+                    Modifier.width(if (widthClass == WidthClass.Expanded) 240.dp else 200.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                ) {
+                    Bugdroid(wave = wave, size = 104.dp)
+                    Controls(wave = wave, onWave = { wave = it })
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun Eyebrow() {
+    Text("Design system · this page, live", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary)
+}
+
+@Composable
+private fun Palette() {
+    val c = MaterialTheme.colorScheme
+    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+        Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+            Swatch("primary", c.primary, c.onPrimary, Modifier.weight(1f))
+            Swatch("container", c.primaryContainer, c.onPrimaryContainer, Modifier.weight(1f))
+            Swatch("secondary", c.secondary, c.onSecondary, Modifier.weight(1f))
+            Swatch("container", c.secondaryContainer, c.onSecondaryContainer, Modifier.weight(1f))
+            Swatch("tertiary", c.tertiary, c.onTertiary, Modifier.weight(1f))
+            Swatch("container", c.tertiaryContainer, c.onTertiaryContainer, Modifier.weight(1f))
+        }
+        Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+            Swatch("lowest", c.surfaceContainerLowest, c.onSurfaceVariant, Modifier.weight(1f), outlined = true)
+            Swatch("low", c.surfaceContainerLow, c.onSurfaceVariant, Modifier.weight(1f), outlined = true)
+            Swatch("container", c.surfaceContainer, c.onSurfaceVariant, Modifier.weight(1f), outlined = true)
+            Swatch("high", c.surfaceContainerHigh, c.onSurfaceVariant, Modifier.weight(1f), outlined = true)
+            Swatch("highest", c.surfaceContainerHighest, c.onSurfaceVariant, Modifier.weight(1f), outlined = true)
+            Swatch("outline", c.outline, c.surface, Modifier.weight(1f))
+        }
+    }
+}
+
+@Composable
+private fun Swatch(role: String, color: Color, onColor: Color, modifier: Modifier, outlined: Boolean = false) {
+    val shape = MaterialTheme.shapes.small
+    // Labels only when they fit: role and hex on wide swatches, hex alone on medium ones, none on narrow.
+    BoxWithConstraints(
+        modifier
+            .height(44.dp)
+            .clip(shape)
+            .background(color)
+            .then(if (outlined) Modifier.border(1.dp, MaterialTheme.colorScheme.outlineVariant, shape) else Modifier)
+            .hoverLift(scale = 1.08f, lift = 2.dp)
+            .padding(horizontal = 6.dp, vertical = 5.dp),
+    ) {
+        val style = MaterialTheme.typography.labelSmall
+        if (maxWidth >= 76.dp) {
+            Text(role, style = style, color = onColor, maxLines = 1, softWrap = false, overflow = TextOverflow.Clip, modifier = Modifier.align(Alignment.TopStart))
+        }
+        if (maxWidth >= 52.dp) {
+            Text(color.hex(), style = style, color = onColor.copy(alpha = 0.85f), maxLines = 1, softWrap = false, overflow = TextOverflow.Clip, modifier = Modifier.align(Alignment.BottomStart))
+        }
+    }
+}
+
+private fun Color.hex(): String = (toArgb() and 0xFFFFFF).toString(16).padStart(6, '0').uppercase()
+
+@Composable
+private fun ShapeScale() {
+    val s = MaterialTheme.shapes
+    Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.Bottom) {
+        listOf(s.extraSmall, s.small, s.medium, s.large, s.extraLarge).forEach { shape ->
+            Box(
+                Modifier
+                    .size(34.dp)
+                    .clip(shape)
+                    .background(MaterialTheme.colorScheme.primaryContainer)
+                    .border(1.5.dp, MaterialTheme.colorScheme.primary, shape)
+                    .hoverLift(scale = 1.12f, lift = 2.dp),
+            )
+        }
+    }
+}
+
+@Composable
+private fun TypeRamp() {
+    val t = MaterialTheme.typography
+    Row(horizontalArrangement = Arrangement.spacedBy(10.dp), verticalAlignment = Alignment.Bottom) {
+        Text("Aa", style = t.displaySmall, color = MaterialTheme.colorScheme.onSurface, softWrap = false)
+        Text("Aa", style = t.headlineSmall, color = MaterialTheme.colorScheme.onSurface, softWrap = false)
+        Text("Aa", style = t.titleMedium, color = MaterialTheme.colorScheme.onSurface, softWrap = false)
+        Text("Aa", style = t.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant, softWrap = false)
+        Text("Aa", style = t.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, softWrap = false)
+    }
+}
+
+@Composable
+private fun Controls(wave: Float, onWave: (Float) -> Unit) {
+    var on by remember { mutableStateOf(true) }
+    var checked by remember { mutableStateOf(true) }
+    val progress by animateFloatAsState(wave, spring(stiffness = Spring.StiffnessLow), label = "progress")
+    Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+            Switch(checked = on, onCheckedChange = { on = it })
+            Checkbox(checked = checked, onCheckedChange = { checked = it })
+            Spacer(Modifier.width(4.dp))
+            LinearProgressIndicator(progress = { progress }, modifier = Modifier.weight(1f))
+        }
+        Slider(value = wave, onValueChange = onWave, enabled = on)
+    }
+}
+
+/** The Android robot, drawn in a 100×100 unit box. [wave] raises the right arm from 0 (down) to 1 (up). */
+@Composable
+private fun Bugdroid(wave: Float, size: Dp) {
+    val armAngle by animateFloatAsState(wave * 150f, spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessLow), label = "arm")
+    val idle = rememberInfiniteTransition(label = "bob")
+    val bob by idle.animateFloat(
+        initialValue = -1.5f,
+        targetValue = 1.5f,
+        animationSpec = infiniteRepeatable(tween(2200), RepeatMode.Reverse),
+        label = "bobY",
+    )
+    val eye = MaterialTheme.colorScheme.surfaceContainerLowest
+    Canvas(Modifier.size(size)) {
+        val u = this.size.minDimension / 100f
+        translate(top = bob * u) {
+            drawBugdroid(u, armAngle, eye)
+        }
+    }
+}
+
+private fun DrawScope.drawBugdroid(u: Float, armAngle: Float, eye: Color) {
+    val green = AndroidGreen
+    fun r(x: Float, y: Float, w: Float, h: Float) = Rect(x * u, y * u, (x + w) * u, (y + h) * u)
+
+    // Head: a half disc with a hairline gap above the body.
+    drawArc(green, startAngle = 180f, sweepAngle = 180f, useCenter = true, topLeft = Offset(26f * u, 14f * u), size = Size(48f * u, 48f * u))
+    // Antennae.
+    drawLine(green, Offset(37f * u, 19f * u), Offset(30f * u, 9f * u), strokeWidth = 3f * u, cap = StrokeCap.Round)
+    drawLine(green, Offset(63f * u, 19f * u), Offset(70f * u, 9f * u), strokeWidth = 3f * u, cap = StrokeCap.Round)
+    // Eyes.
+    drawCircle(eye, radius = 2.6f * u, center = Offset(41f * u, 29f * u))
+    drawCircle(eye, radius = 2.6f * u, center = Offset(59f * u, 29f * u))
+    // Body, rounded only at the bottom.
+    drawPath(bottomRounded(r(26f, 41f, 48f, 37f), 8f * u), green)
+    // Legs.
+    drawPath(bottomRounded(r(36f, 76f, 8f, 16f), 4f * u), green)
+    drawPath(bottomRounded(r(56f, 76f, 8f, 16f), 4f * u), green)
+    // Left arm, resting.
+    drawRoundRect(green, topLeft = Offset(16f * u, 41f * u), size = Size(8f * u, 30f * u), cornerRadius = CornerRadius(4f * u))
+    // Right arm, pivoting at its shoulder.
+    rotate(degrees = armAngle, pivot = Offset(80f * u, 45f * u)) {
+        drawRoundRect(green, topLeft = Offset(76f * u, 41f * u), size = Size(8f * u, 30f * u), cornerRadius = CornerRadius(4f * u))
+    }
+}
+
+private fun bottomRounded(rect: Rect, radius: Float): Path = Path().apply {
+    addRoundRect(
+        RoundRect(
+            rect,
+            topLeft = CornerRadius.Zero,
+            topRight = CornerRadius.Zero,
+            bottomRight = CornerRadius(radius),
+            bottomLeft = CornerRadius(radius),
+        ),
+    )
+}

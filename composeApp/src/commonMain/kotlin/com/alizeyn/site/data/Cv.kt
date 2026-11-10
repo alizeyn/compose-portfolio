@@ -25,11 +25,6 @@ object Profile {
     const val github = "https://github.com/alizeyn"
     const val location = "Vienna, Austria"
     const val tagline = "Ten years of Android, from Java to Jetpack Compose. I build the UI components other teams build with."
-    const val shoutTitle = "Fluent in both languages."
-    const val shoutBody =
-        "I translate UX intent into component APIs, and technical constraints back into design conversations. " +
-            "Nearly a decade on Android teams, a product designer's eye, and a library author's habits: " +
-            "clean API surfaces, documentation, changelogs, and no surprise breaking changes."
 }
 
 val about: List<Paragraph> = listOf(

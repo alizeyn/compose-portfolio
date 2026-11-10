@@ -41,7 +41,6 @@ fun Page(widthClass: WidthClass, content: @Composable ColumnScope.() -> Unit) {
     ) {
         Spacer(Modifier.height(if (widthClass == WidthClass.Compact) 0.dp else 24.dp))
         content()
-        Footer()
         Spacer(Modifier.height(24.dp))
     }
 }
@@ -69,12 +68,3 @@ fun AccentParagraph(paragraph: Paragraph, modifier: Modifier = Modifier) {
     Text(text, style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurface, modifier = modifier)
 }
 
-@Composable
-private fun Footer() {
-    Text(
-        "Drawn with Compose Multiplatform for Web and Material 3. © Ali Zeynali",
-        style = MaterialTheme.typography.bodySmall,
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
-        modifier = Modifier.padding(top = 24.dp),
-    )
-}
