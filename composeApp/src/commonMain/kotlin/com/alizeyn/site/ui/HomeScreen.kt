@@ -224,7 +224,7 @@ private fun HeroCopy(modifier: Modifier, onEmail: () -> Unit, onWork: () -> Unit
 @Composable
 private fun About(widthClass: WidthClass) {
     Column(verticalArrangement = Arrangement.spacedBy(24.dp)) {
-        Reveal { SectionHeader("About", "Engineer with a designer's eye") }
+        Reveal { SectionHeader("About · Development and product design", "Multidisciplinary engineer") }
         if (widthClass == WidthClass.Expanded) {
             Row(horizontalArrangement = Arrangement.spacedBy(32.dp)) {
                 Column(Modifier.weight(3f), verticalArrangement = Arrangement.spacedBy(16.dp)) {

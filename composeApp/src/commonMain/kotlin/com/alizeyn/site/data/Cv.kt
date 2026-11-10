@@ -34,11 +34,20 @@ object Profile {
 
 val about: List<Paragraph> = listOf(
     listOf(
-        plain("I've been building Android apps for about ten years: Java to Kotlin, XML to "),
+        plain("I've been building Android apps for about ten years, from Java to Kotlin and from XML to "),
         accent("Jetpack Compose"),
-        plain(", for products with more than 10 million users. The constant through all of it: the UI layer is where I do my best work."),
+        plain(", for products used by more than 10 million people. Along the way I've shipped iOS work in "),
+        accent("SwiftUI"),
+        plain(" as well."),
     ),
-    listOf(plain("[ Will be written by myself later ]")),
+    listOf(
+        plain("The constant through all of it is "),
+        accent("user experience"),
+        plain(". My strength is a holistic view of how a product looks and feels. I have an eye for detail, and the visual side of development is the part I enjoy most."),
+    ),
+    listOf(
+        plain("After almost a decade on mobile I know the two platforms' preferences and differences well, with the heavier weight on Android."),
+    ),
 )
 
 data class Role(
@@ -58,7 +67,7 @@ data class Role(
 val roles: List<Role> = listOf(
     Role(
         company = "Foxyfitness",
-        title = "Android Engineer",
+        title = "Android & iOS Engineer",
         period = "Jan 2026 – Present",
         arrangement = "Hybrid",
         place = "Linz",
@@ -66,10 +75,11 @@ val roles: List<Role> = listOf(
         linkedin = "https://www.linkedin.com/company/foxyfitness/",
         summary = "Fitness start-up. A small team, so everyone wears several hats.",
         highlights = listOf(
+            "Shipped iOS alongside Android: SwiftUI work on Zone5 and the Push Up Counter, keeping both apps in step.",
             "Integrated AI tooling into the everyday workflow, from prototyping to implementation.",
             "A growing share of product design and UI/UX work alongside Android development.",
         ),
-        stack = listOf("Kotlin", "Jetpack Compose", "AI-assisted workflows"),
+        stack = listOf("Kotlin", "Jetpack Compose", "SwiftUI", "AI-assisted workflows"),
     ),
     Role(
         company = "Ohana",
@@ -133,7 +143,7 @@ const val rolesFootnote =
 data class SkillGroup(val title: String, val skills: List<String>)
 
 val toolkit: List<SkillGroup> = listOf(
-    SkillGroup("Build with", listOf("Kotlin", "Jetpack Compose", "Material 3", "Coroutines & Flow", "Hilt", "Room", "Compose Multiplatform")),
+    SkillGroup("Build with", listOf("Kotlin", "Jetpack Compose", "Material 3", "Coroutines & Flow", "Hilt", "Room", "Compose Multiplatform", "SwiftUI")),
     SkillGroup("Keep it honest", listOf("Unit & UI tests", "Code review", "GitHub Actions", "GitLab CI", "Jenkins", "Clean architecture", "SOLID")),
     SkillGroup("Design side", listOf("Design systems", "Component APIs", "Figma", "RTL layouts", "Prototyping", "Motion")),
     SkillGroup("Also", listOf("Java", "RxJava", "SDK docs & changelogs", "Git", "Agile")),
@@ -152,8 +162,8 @@ data class App(
 private fun play(id: String) = "https://play.google.com/store/apps/details?id=$id"
 
 val apps: List<App> = listOf(
-    App("Zone5", "Foxyfitness", "Camera-coached workouts that keep you in the zone.", Res.drawable.icon_zone5, play("app.foxyfitness.android.zone5")),
-    App("Push Up Counter", "Foxyfitness", "Automatic push-up counting, plans and leaderboards.", Res.drawable.icon_pushups, play("app.foxyfitness.pushups")),
+    App("Zone5", "Foxyfitness", "Camera-coached workouts that keep you in the zone. Android and iOS.", Res.drawable.icon_zone5, play("app.foxyfitness.android.zone5")),
+    App("Push Up Counter", "Foxyfitness", "Automatic push-up counting, plans and leaderboards. Android and iOS.", Res.drawable.icon_pushups, play("app.foxyfitness.pushups")),
     App("Ohana", "Ohana", "Parental controls: screen time, app blocks and routines.", Res.drawable.icon_ohana, play("com.tryohana.android")),
     App("BILLA Scan & Go", "shopreme", "Scan, pay and go, built on the shopreme SDK.", Res.drawable.icon_billa, play("at.billa.scanandpay")),
     App("Neshan", "Neshan", "Maps and navigation for more than 10 million people.", Res.drawable.icon_neshan, play("org.rajman.neshan.traffic.tehran.navigator")),
