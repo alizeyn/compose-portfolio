@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -28,20 +29,25 @@ import com.alizeyn.site.data.Paragraph
 /** Material 3 layout margins: 16dp compact, 24dp medium and expanded. */
 fun WidthClass.margin(): Dp = if (this == WidthClass.Compact) 16.dp else 24.dp
 
-/** A scrolling page column capped at a readable measure and centred. */
+/**
+ * A scrolling page column capped at a readable measure and centred. Text inside is selectable
+ * and copyable; the selection colours come from the Material theme's primary.
+ */
 @Composable
 fun Page(widthClass: WidthClass, content: @Composable ColumnScope.() -> Unit) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .verticalScroll(rememberScrollState())
-            .padding(PaddingValues(horizontal = widthClass.margin()))
-            .widthIn(max = 1040.dp),
-        verticalArrangement = Arrangement.spacedBy(24.dp),
-    ) {
-        Spacer(Modifier.height(if (widthClass == WidthClass.Compact) 0.dp else 24.dp))
-        content()
-        Spacer(Modifier.height(24.dp))
+    SelectionContainer {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .verticalScroll(rememberScrollState())
+                .padding(PaddingValues(horizontal = widthClass.margin()))
+                .widthIn(max = 1040.dp),
+            verticalArrangement = Arrangement.spacedBy(24.dp),
+        ) {
+            Spacer(Modifier.height(if (widthClass == WidthClass.Compact) 0.dp else 24.dp))
+            content()
+            Spacer(Modifier.height(24.dp))
+        }
     }
 }
 
