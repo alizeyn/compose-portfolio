@@ -75,8 +75,8 @@ fun HomeScreen(widthClass: WidthClass, onEmail: () -> Unit, onWork: () -> Unit) 
     Page(widthClass) {
         Hero(widthClass, onEmail, onWork)
         About(widthClass)
-        Toolkit(widthClass)
         Reveal { DesignSystemCard(widthClass) }
+        Toolkit(widthClass)
     }
 }
 

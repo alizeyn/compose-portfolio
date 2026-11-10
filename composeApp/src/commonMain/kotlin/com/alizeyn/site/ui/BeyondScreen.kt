@@ -15,8 +15,6 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
@@ -292,9 +290,8 @@ private fun Headline(platform: Platform, onBg: Color, compact: Boolean) {
         Box(Modifier.width(if (compact) 172.dp else 232.dp), contentAlignment = Alignment.Center) {
             AnimatedContent(
                 targetState = platform,
-                transitionSpec = {
-                    (slideInVertically { it / 2 } + fadeIn()) togetherWith (slideOutVertically { -it / 2 } + fadeOut())
-                },
+                // A clean fade: the old word is fully gone before the new one appears.
+                transitionSpec = { fadeIn(tween(350, delayMillis = 250)) togetherWith fadeOut(tween(250)) },
                 label = "platform",
             ) { p ->
                 val accent = lookFor(p).accent
