@@ -70,7 +70,7 @@ fun DesignSystemCard(widthClass: WidthClass) {
     Card(
         shape = MaterialTheme.shapes.extraLarge,
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
-        modifier = Modifier.fillMaxWidth().hoverLift(scale = 1.008f),
+        modifier = Modifier.fillMaxWidth(),
     ) {
         if (widthClass == WidthClass.Compact) {
             Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
@@ -151,7 +151,6 @@ private fun Swatch(role: String, color: Color, onColor: Color, modifier: Modifie
             .clip(shape)
             .background(color)
             .then(if (outlined) Modifier.border(1.dp, MaterialTheme.colorScheme.outlineVariant, shape) else Modifier)
-            .hoverLift(scale = 1.08f, lift = 2.dp)
             .padding(horizontal = 6.dp, vertical = 5.dp),
     ) {
         val style = MaterialTheme.typography.labelSmall
@@ -177,7 +176,6 @@ private fun ShapeScale() {
                     .clip(shape)
                     .background(MaterialTheme.colorScheme.primaryContainer)
                     .border(1.5.dp, MaterialTheme.colorScheme.primary, shape)
-                    .hoverLift(scale = 1.12f, lift = 2.dp),
             )
         }
     }
