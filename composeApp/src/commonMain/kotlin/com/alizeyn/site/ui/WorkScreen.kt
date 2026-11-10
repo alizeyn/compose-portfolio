@@ -3,9 +3,6 @@ package com.alizeyn.site.ui
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -18,6 +15,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DateRange
@@ -37,7 +35,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.alizeyn.site.WidthClass
@@ -82,34 +79,48 @@ fun WorkScreen(widthClass: WidthClass) {
     }
 }
 
-/** The apps in Pixel frames, side by side; each opens its Play Store listing. */
+/** The apps as store icons; each opens its Play Store listing. */
 @Composable
 private fun AppShelf(widthClass: WidthClass) {
     val uriHandler = LocalUriHandler.current
-    val frameWidth = if (widthClass == WidthClass.Compact) 150.dp else 170.dp
-    LazyRow(
-        horizontalArrangement = Arrangement.spacedBy(20.dp),
-        contentPadding = PaddingValues(vertical = 8.dp),
-    ) {
-        items(apps) { app -> AppCard(app, frameWidth, onOpen = { uriHandler.openUri(app.playUrl) }) }
+    if (widthClass == WidthClass.Compact) {
+        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            apps.forEachIndexed { i, app -> Reveal(delayMillis = i * 60) { AppRow(app, onOpen = { uriHandler.openUri(app.playUrl) }) } }
+        }
+    } else {
+        // Cards share each row evenly: all five across on desktop, three per row on tablets.
+        FlowRow(
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+            maxItemsInEachRow = if (widthClass == WidthClass.Expanded) 5 else 3,
+        ) {
+            apps.forEachIndexed { i, app ->
+                Reveal(Modifier.weight(1f), delayMillis = i * 60) { AppCard(app, onOpen = { uriHandler.openUri(app.playUrl) }) }
+            }
+        }
     }
 }
 
 @Composable
-private fun AppCard(app: App, frameWidth: Dp, onOpen: () -> Unit) {
-    Reveal(pop = true) {
-        Column(Modifier.width(frameWidth + 20.dp), verticalArrangement = Arrangement.spacedBy(10.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-            PixelFrame(
-                screenshot = app.screenshot,
-                contentDescription = "${app.name} on a Pixel",
-                width = frameWidth,
-                modifier = Modifier.hoverLift(lift = 6.dp).clickable(onClick = onOpen),
-            )
-            Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                Text(app.name, style = MaterialTheme.typography.titleMedium, textAlign = TextAlign.Center)
+private fun AppIcon(app: App, size: Dp) {
+    Image(
+        painter = painterResource(app.icon),
+        contentDescription = "${app.name} icon",
+        contentScale = ContentScale.Fit,
+        modifier = Modifier.size(size).clip(RoundedCornerShape(size * 0.22f)),
+    )
+}
+
+@Composable
+private fun AppCard(app: App, onOpen: () -> Unit) {
+    ElevatedCard(Modifier.fillMaxWidth().hoverLift().clickable(onClick = onOpen)) {
+        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            AppIcon(app, 64.dp)
+            Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                Text(app.name, style = MaterialTheme.typography.titleMedium)
                 Text(app.company, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.primary)
-                Text(app.blurb, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, textAlign = TextAlign.Center)
             }
+            Text(app.blurb, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             FilledTonalButton(onClick = onOpen, contentPadding = ButtonDefaults.ButtonWithIconContentPadding) {
                 Text("Play Store")
                 Spacer(Modifier.size(ButtonDefaults.IconSpacing))
@@ -119,6 +130,20 @@ private fun AppCard(app: App, frameWidth: Dp, onOpen: () -> Unit) {
     }
 }
 
+@Composable
+private fun AppRow(app: App, onOpen: () -> Unit) {
+    ElevatedCard(Modifier.fillMaxWidth().hoverLift().clickable(onClick = onOpen)) {
+        Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+            AppIcon(app, 56.dp)
+            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                Text(app.name, style = MaterialTheme.typography.titleMedium)
+                Text(app.company, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.primary)
+                Text(app.blurb, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
+            Icon(painterResource(Res.drawable.ic_open_in_new), contentDescription = "Open on the Play Store", tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(18.dp))
+        }
+    }
+}
 @Composable
 private fun RoleCard(role: Role, modifier: Modifier = Modifier) {
     val uriHandler = LocalUriHandler.current
@@ -189,3 +214,4 @@ private fun RoleCard(role: Role, modifier: Modifier = Modifier) {
         }
     }
 }
+

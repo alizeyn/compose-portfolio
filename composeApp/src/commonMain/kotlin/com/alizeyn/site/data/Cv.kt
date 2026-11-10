@@ -1,11 +1,11 @@
 package com.alizeyn.site.data
 
 import com.alizeyn.site.resources.Res
-import com.alizeyn.site.resources.app_billa
-import com.alizeyn.site.resources.app_neshan
-import com.alizeyn.site.resources.app_ohana
-import com.alizeyn.site.resources.app_pushups
-import com.alizeyn.site.resources.app_zone5
+import com.alizeyn.site.resources.icon_billa
+import com.alizeyn.site.resources.icon_neshan
+import com.alizeyn.site.resources.icon_ohana
+import com.alizeyn.site.resources.icon_pushups
+import com.alizeyn.site.resources.icon_zone5
 import com.alizeyn.site.resources.logo_foxyfitness
 import com.alizeyn.site.resources.logo_neshan
 import com.alizeyn.site.resources.logo_ohana
@@ -159,16 +159,16 @@ data class App(
     val name: String,
     val company: String,
     val blurb: String,
-    val screenshot: DrawableResource,
+    val icon: DrawableResource,
     val playUrl: String,
 )
 
 private fun play(id: String) = "https://play.google.com/store/apps/details?id=$id"
 
 val apps: List<App> = listOf(
-    App("Zone5", "Foxyfitness", "Camera-coached workouts that keep you in the zone.", Res.drawable.app_zone5, play("app.foxyfitness.android.zone5")),
-    App("Push Up Counter", "Foxyfitness", "Automatic push-up counting, plans and leaderboards.", Res.drawable.app_pushups, play("app.foxyfitness.pushups")),
-    App("Ohana", "Ohana", "Parental controls: screen time, app blocks and routines.", Res.drawable.app_ohana, play("com.tryohana.android")),
-    App("BILLA Scan & Go", "shopreme", "Scan, pay and go, built on the shopreme SDK.", Res.drawable.app_billa, play("at.billa.scanandpay")),
-    App("Neshan", "Neshan", "Maps and navigation for more than 10 million people.", Res.drawable.app_neshan, play("org.rajman.neshan.traffic.tehran.navigator")),
+    App("Zone5", "Foxyfitness", "Camera-coached workouts that keep you in the zone.", Res.drawable.icon_zone5, play("app.foxyfitness.android.zone5")),
+    App("Push Up Counter", "Foxyfitness", "Automatic push-up counting, plans and leaderboards.", Res.drawable.icon_pushups, play("app.foxyfitness.pushups")),
+    App("Ohana", "Ohana", "Parental controls: screen time, app blocks and routines.", Res.drawable.icon_ohana, play("com.tryohana.android")),
+    App("BILLA Scan & Go", "shopreme", "Scan, pay and go, built on the shopreme SDK.", Res.drawable.icon_billa, play("at.billa.scanandpay")),
+    App("Neshan", "Neshan", "Maps and navigation for more than 10 million people.", Res.drawable.icon_neshan, play("org.rajman.neshan.traffic.tehran.navigator")),
 )
