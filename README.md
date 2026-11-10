@@ -2,7 +2,7 @@
 
 The personal site rebuilt as a **Compose Multiplatform for Web** app: Kotlin compiled
 to WebAssembly, drawn with **Material 3** components, adaptive layout and a
-light/dark colour scheme seeded from the printed CV poster palette.
+light/dark colour scheme seeded from the Android brand green.
 
 ```bash
 ./gradlew wasmJsBrowserDevelopmentRun      # dev server with live reload
@@ -35,8 +35,9 @@ composeApp/src/
 
 - **Window size classes** at 600dp and 840dp decide the navigation component
   (bar vs rail), the layout margins (16dp vs 24dp) and one- vs two-column heroes.
-- **Colour**: hand-built light and dark `ColorScheme`s. Primary is the poster's
-  cobalt, secondary its teal, tertiary the rust/orange, background the paper tone.
+- **Colour**: light and dark Material 3 "vibrant" `ColorScheme`s generated from the
+  Android brand green (#3DDC84) with material-color-utilities. Light is the default;
+  the toggle cross-fades every colour role.
   Company accents on the Work page use tonal container pairs that follow the theme.
 - **Shape** uses the M3 shape-scale tokens; photographs and hero cards sit on
   `extraLarge` (28dp).

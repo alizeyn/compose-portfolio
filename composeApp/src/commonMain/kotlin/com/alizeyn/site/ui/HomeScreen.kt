@@ -2,6 +2,7 @@ package com.alizeyn.site.ui
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
@@ -39,7 +40,6 @@ import com.alizeyn.site.data.Profile
 import com.alizeyn.site.data.about
 import com.alizeyn.site.data.toolkit
 import com.alizeyn.site.resources.Res
-import com.alizeyn.site.resources.about_sky
 import com.alizeyn.site.resources.hero_portrait
 import com.alizeyn.site.resources.ic_camera
 import com.alizeyn.site.resources.ic_language
@@ -65,7 +65,7 @@ private val facts = listOf(
 fun HomeScreen(widthClass: WidthClass, onEmail: () -> Unit, onWork: () -> Unit) {
     Page(widthClass) {
         Hero(widthClass, onEmail, onWork)
-        ShoutCard()
+        Reveal { ShoutCard() }
         About(widthClass)
         Toolkit()
     }
@@ -75,31 +75,34 @@ fun HomeScreen(widthClass: WidthClass, onEmail: () -> Unit, onWork: () -> Unit) 
 private fun Hero(widthClass: WidthClass, onEmail: () -> Unit, onWork: () -> Unit) {
     when (widthClass) {
         WidthClass.Compact -> Column(verticalArrangement = Arrangement.spacedBy(24.dp)) {
-            Portrait(size = 160.dp)
+            Reveal(pop = true) { Portrait(size = 160.dp) }
             HeroCopy(Modifier.fillMaxWidth(), onEmail, onWork)
         }
         else -> Row(horizontalArrangement = Arrangement.spacedBy(32.dp), verticalAlignment = Alignment.CenterVertically) {
             HeroCopy(Modifier.weight(1f), onEmail, onWork)
-            Portrait(size = if (widthClass == WidthClass.Expanded) 260.dp else 200.dp)
+            Reveal(pop = true, delayMillis = 150) { Portrait(size = if (widthClass == WidthClass.Expanded) 260.dp else 200.dp) }
         }
     }
 }
 
-/** Head-and-shoulders crop of the film-shop photo, in the extra-large rounded rect. */
+/** Head-and-shoulders crop of the film-shop photo, in the extra-large rounded rect, over a turning halo. */
 @Composable
 private fun Portrait(size: Dp) {
-    Image(
-        painter = painterResource(Res.drawable.hero_portrait),
-        contentDescription = "Portrait of Ali in a film shop",
-        contentScale = ContentScale.Crop,
-        modifier = Modifier.size(size).clip(MaterialTheme.shapes.extraLarge),
-    )
+    Glow(Modifier.size(size).hoverLift(scale = 1.03f, lift = 4.dp)) {
+        Image(
+            painter = painterResource(Res.drawable.hero_portrait),
+            contentDescription = "Portrait of Ali in a film shop",
+            contentScale = ContentScale.Crop,
+            modifier = Modifier.size(size).clip(MaterialTheme.shapes.extraLarge),
+        )
+    }
 }
 
 @Composable
 private fun HeroCopy(modifier: Modifier, onEmail: () -> Unit, onWork: () -> Unit) {
     val uriHandler = LocalUriHandler.current
     Column(modifier, verticalArrangement = Arrangement.spacedBy(16.dp)) {
+        Reveal {
         FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             AssistChip(
                 onClick = onWork,
@@ -131,16 +134,22 @@ private fun HeroCopy(modifier: Modifier, onEmail: () -> Unit, onWork: () -> Unit
                 },
             )
         }
-        Column {
-            Text(Profile.firstName, style = MaterialTheme.typography.displayLarge, color = MaterialTheme.colorScheme.onBackground)
-            Text(Profile.lastName, style = MaterialTheme.typography.displayLarge, color = MaterialTheme.colorScheme.primary)
         }
-        Text(
-            Profile.tagline,
-            style = MaterialTheme.typography.titleLarge,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
+        Reveal(delayMillis = 90) {
+            Column {
+                Text(Profile.firstName, style = MaterialTheme.typography.displayLarge, color = MaterialTheme.colorScheme.onBackground)
+                Text(Profile.lastName, style = MaterialTheme.typography.displayLarge.copy(brush = shimmerBrush()))
+            }
+        }
+        Reveal(delayMillis = 180) {
+            Text(
+                Profile.tagline,
+                style = MaterialTheme.typography.titleLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
         Spacer(Modifier.height(4.dp))
+        Reveal(delayMillis = 270) {
         FlowRow(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             Button(onClick = onEmail, contentPadding = ButtonDefaults.ButtonWithIconContentPadding) {
                 Icon(Icons.Filled.Email, contentDescription = null, modifier = Modifier.size(ButtonDefaults.IconSize))
@@ -157,6 +166,7 @@ private fun HeroCopy(modifier: Modifier, onEmail: () -> Unit, onWork: () -> Unit
             }
             OutlinedButton(onClick = onWork) { Text("See my work") }
         }
+        }
     }
 }
 
@@ -168,7 +178,7 @@ private fun ShoutCard() {
             contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
         ),
         shape = MaterialTheme.shapes.extraLarge,
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth().hoverLift().clip(MaterialTheme.shapes.extraLarge).sheen(),
     ) {
         Column(Modifier.padding(28.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Text(Profile.shoutTitle, style = MaterialTheme.typography.headlineMedium)
@@ -180,28 +190,22 @@ private fun ShoutCard() {
 @Composable
 private fun About(widthClass: WidthClass) {
     Column(verticalArrangement = Arrangement.spacedBy(24.dp)) {
-        Banner(
-            Res.drawable.about_sky,
-            "A silhouette against the sky",
-            height = if (widthClass == WidthClass.Compact) 180.dp else 240.dp,
-            alignment = Alignment.BottomCenter,
-        )
-        SectionHeader("About", "Engineer with a designer's eye")
+        Reveal { SectionHeader("About", "Engineer with a designer's eye") }
         if (widthClass == WidthClass.Expanded) {
             Row(horizontalArrangement = Arrangement.spacedBy(32.dp)) {
                 Column(Modifier.weight(3f), verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                    about.forEach { AccentParagraph(it) }
+                    about.forEachIndexed { i, p -> Reveal(delayMillis = i * 80) { AccentParagraph(p) } }
                 }
                 Column(Modifier.weight(2f), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    facts.forEach { FactCard(it) }
+                    facts.forEachIndexed { i, f -> Reveal(delayMillis = 120 + i * 80) { FactCard(f) } }
                 }
             }
         } else {
             Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                about.forEach { AccentParagraph(it) }
+                about.forEachIndexed { i, p -> Reveal(delayMillis = i * 60) { AccentParagraph(p) } }
             }
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                facts.forEach { FactCard(it) }
+                facts.forEachIndexed { i, f -> Reveal(delayMillis = i * 60) { FactCard(f) } }
             }
         }
     }
@@ -209,7 +213,7 @@ private fun About(widthClass: WidthClass) {
 
 @Composable
 private fun FactCard(fact: Fact) {
-    OutlinedCard(Modifier.fillMaxWidth()) {
+    OutlinedCard(Modifier.fillMaxWidth().hoverLift()) {
         Row(Modifier.padding(16.dp), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
             Icon(painterResource(fact.icon), contentDescription = null, tint = MaterialTheme.colorScheme.primary)
             Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
@@ -223,12 +227,18 @@ private fun FactCard(fact: Fact) {
 @Composable
 private fun Toolkit() {
     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-        SectionHeader("Toolkit", "What I build with")
-        toolkit.forEach { group ->
+        Reveal { SectionHeader("Toolkit", "What I build with") }
+        toolkit.forEachIndexed { groupIndex, group ->
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text(group.title, style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Reveal(delayMillis = groupIndex * 60) {
+                    Text(group.title, style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
                 FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    group.skills.forEach { SuggestionChip(onClick = {}, label = { Text(it) }) }
+                    group.skills.forEachIndexed { i, skill ->
+                        Reveal(pop = true, delayMillis = groupIndex * 60 + i * 35) {
+                            SuggestionChip(onClick = {}, label = { Text(skill) }, modifier = Modifier.hoverLift(scale = 1.06f, lift = 1.dp))
+                        }
+                    }
                 }
             }
         }

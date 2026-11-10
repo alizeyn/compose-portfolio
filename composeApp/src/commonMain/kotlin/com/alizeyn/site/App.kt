@@ -1,12 +1,16 @@
 package com.alizeyn.site
 
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
@@ -43,6 +47,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.unit.Dp
@@ -96,9 +101,8 @@ fun App(
     initialDestination: Destination = Destination.Home,
     onDestinationChanged: (Destination) -> Unit = {},
 ) {
-    val systemDark = isSystemInDarkTheme()
-    var darkOverride by remember { mutableStateOf<Boolean?>(null) }
-    val dark = darkOverride ?: systemDark
+    // Light is the default; the toggle flips it for the session.
+    var dark by remember { mutableStateOf(false) }
 
     SiteTheme(darkTheme = dark) {
         var destination by remember { mutableStateOf(initialDestination) }
@@ -110,7 +114,7 @@ fun App(
             BoxWithConstraints {
                 val widthClass = widthClassFor(maxWidth)
                 val themeToggle: @Composable () -> Unit = {
-                    ThemeToggle(dark = dark, onToggle = { darkOverride = !dark })
+                    ThemeToggle(dark = dark, onToggle = { dark = !dark })
                 }
 
                 when (widthClass) {
@@ -136,9 +140,20 @@ fun App(
 
 @Composable
 private fun ThemeToggle(dark: Boolean, onToggle: () -> Unit) {
-    val painter: Painter = painterResource(if (dark) Res.drawable.ic_light_mode else Res.drawable.ic_dark_mode)
+    val rotation by animateFloatAsState(if (dark) 180f else 0f, spring(stiffness = 200f, dampingRatio = 0.7f), label = "toggleSpin")
     IconButton(onClick = onToggle) {
-        Icon(painter, contentDescription = if (dark) "Switch to light theme" else "Switch to dark theme")
+        AnimatedContent(
+            targetState = dark,
+            transitionSpec = { (fadeIn(tween(250)) + scaleIn(initialScale = 0.6f)) togetherWith (fadeOut(tween(150)) + scaleOut(targetScale = 0.6f)) },
+            label = "toggleIcon",
+        ) { isDark ->
+            val painter: Painter = painterResource(if (isDark) Res.drawable.ic_light_mode else Res.drawable.ic_dark_mode)
+            Icon(
+                painter,
+                contentDescription = if (isDark) "Switch to light theme" else "Switch to dark theme",
+                modifier = Modifier.rotate(rotation),
+            )
+        }
     }
 }
 
@@ -234,7 +249,8 @@ private fun Content(
     AnimatedContent(
         targetState = destination,
         transitionSpec = {
-            (fadeIn() + slideInVertically { it / 24 }) togetherWith (fadeOut() + slideOutVertically { -it / 24 })
+            (fadeIn(tween(350)) + slideInVertically(spring(stiffness = 300f)) { it / 20 } + scaleIn(initialScale = 0.985f)) togetherWith
+                (fadeOut(tween(200)) + slideOutVertically { -it / 30 })
         },
         label = "destination",
     ) { target ->

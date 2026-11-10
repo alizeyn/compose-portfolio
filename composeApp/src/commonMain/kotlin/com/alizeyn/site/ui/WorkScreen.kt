@@ -31,17 +31,14 @@ import com.alizeyn.site.WidthClass
 import com.alizeyn.site.data.Role
 import com.alizeyn.site.data.roles
 import com.alizeyn.site.data.rolesFootnote
-import com.alizeyn.site.resources.Res
-import com.alizeyn.site.resources.experience_facade
 import org.jetbrains.compose.resources.painterResource
 
 @Composable
 fun WorkScreen(widthClass: WidthClass) {
     Page(widthClass) {
-        Banner(Res.drawable.experience_facade, "A facade in Graz", height = if (widthClass == WidthClass.Compact) 180.dp else 260.dp)
-        SectionHeader("Work", "Ten years, four teams")
+        Reveal { SectionHeader("Work", "Ten years, four teams") }
         Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-            roles.forEach { RoleCard(it) }
+            roles.forEachIndexed { i, role -> Reveal(delayMillis = i * 70) { RoleCard(role) } }
         }
         Text(
             rolesFootnote,
@@ -53,12 +50,13 @@ fun WorkScreen(widthClass: WidthClass) {
 
 @Composable
 private fun RoleCard(role: Role) {
-    ElevatedCard(Modifier.fillMaxWidth()) {
+    ElevatedCard(Modifier.fillMaxWidth().hoverLift()) {
         Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(14.dp)) {
                 Box(
                     Modifier
                         .size(52.dp)
+                        .hoverLift(scale = 1.1f, lift = 0.dp)
                         .clip(MaterialTheme.shapes.medium)
                         .background(MaterialTheme.colorScheme.surfaceContainerHighest),
                     contentAlignment = Alignment.Center,
@@ -101,7 +99,7 @@ private fun RoleCard(role: Role) {
                 }
             }
             FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                role.stack.forEach { SuggestionChip(onClick = {}, label = { Text(it) }) }
+                role.stack.forEach { SuggestionChip(onClick = {}, label = { Text(it) }, modifier = Modifier.hoverLift(scale = 1.06f, lift = 1.dp)) }
             }
         }
     }

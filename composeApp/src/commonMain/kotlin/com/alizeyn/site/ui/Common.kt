@@ -1,6 +1,5 @@
 package com.alizeyn.site.ui
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
@@ -17,8 +16,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -27,8 +24,6 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.alizeyn.site.WidthClass
 import com.alizeyn.site.data.Paragraph
-import org.jetbrains.compose.resources.DrawableResource
-import org.jetbrains.compose.resources.painterResource
 
 /** Material 3 layout margins: 16dp compact, 24dp medium and expanded. */
 fun WidthClass.margin(): Dp = if (this == WidthClass.Compact) 16.dp else 24.dp
@@ -57,23 +52,6 @@ fun SectionHeader(eyebrow: String, title: String, modifier: Modifier = Modifier)
         Text(eyebrow, style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary)
         Text(title, style = MaterialTheme.typography.headlineLarge, color = MaterialTheme.colorScheme.onBackground)
     }
-}
-
-@Composable
-fun Banner(
-    image: DrawableResource,
-    contentDescription: String,
-    height: Dp,
-    modifier: Modifier = Modifier,
-    alignment: Alignment = Alignment.Center,
-) {
-    Image(
-        painter = painterResource(image),
-        contentDescription = contentDescription,
-        contentScale = ContentScale.Crop,
-        alignment = alignment,
-        modifier = modifier.fillMaxWidth().height(height).clip(MaterialTheme.shapes.extraLarge),
-    )
 }
 
 @Composable

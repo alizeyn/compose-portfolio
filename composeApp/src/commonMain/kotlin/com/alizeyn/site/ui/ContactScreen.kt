@@ -19,6 +19,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.unit.dp
@@ -32,20 +33,26 @@ import org.jetbrains.compose.resources.painterResource
 fun ContactScreen(widthClass: WidthClass, onEmail: () -> Unit) {
     val uriHandler = LocalUriHandler.current
     Page(widthClass) {
-        SectionHeader("Contact", "Say hi")
-        Text(
-            "Looking for someone who can shape a product's look and feel and still ship the thing? Let's talk.",
-            style = MaterialTheme.typography.bodyLarge,
-        )
-        ExtendedFloatingActionButton(
-            onClick = onEmail,
-            icon = { Icon(Icons.Filled.Email, contentDescription = null) },
-            text = { Text("Email me") },
-            containerColor = MaterialTheme.colorScheme.primaryContainer,
-            contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-        )
+        Reveal { SectionHeader("Contact", "Say hi") }
+        Reveal(delayMillis = 80) {
+            Text(
+                "Looking for someone who can shape a product's look and feel and still ship the thing? Let's talk.",
+                style = MaterialTheme.typography.bodyLarge,
+            )
+        }
+        Reveal(pop = true, delayMillis = 160) {
+            ExtendedFloatingActionButton(
+                onClick = onEmail,
+                icon = { Icon(Icons.Filled.Email, contentDescription = null) },
+                text = { Text("Email me") },
+                containerColor = MaterialTheme.colorScheme.primaryContainer,
+                contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                modifier = Modifier.hoverLift(scale = 1.04f).clip(MaterialTheme.shapes.large).sheen(),
+            )
+        }
+        Reveal(delayMillis = 240) {
         Card(
-            Modifier.fillMaxWidth(),
+            Modifier.fillMaxWidth().hoverLift(),
             shape = MaterialTheme.shapes.extraLarge,
             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
         ) {
@@ -78,6 +85,7 @@ fun ContactScreen(widthClass: WidthClass, onEmail: () -> Unit) {
                     onClick = null,
                 )
             }
+        }
         }
     }
 }

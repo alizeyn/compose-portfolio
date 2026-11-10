@@ -1,6 +1,11 @@
 package com.alizeyn.site.ui
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
@@ -28,16 +33,13 @@ import androidx.compose.ui.unit.dp
 import com.alizeyn.site.WidthClass
 import com.alizeyn.site.data.Faq
 import com.alizeyn.site.data.faqs
-import com.alizeyn.site.resources.Res
-import com.alizeyn.site.resources.faq_shore
 
 @Composable
 fun FaqScreen(widthClass: WidthClass) {
     Page(widthClass) {
-        Banner(Res.drawable.faq_shore, "A shore", height = if (widthClass == WidthClass.Compact) 180.dp else 260.dp)
-        SectionHeader("FAQ", "Questions I get asked")
+        Reveal { SectionHeader("FAQ", "Questions I get asked") }
         Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            faqs.forEachIndexed { index, faq -> FaqCard(faq, initiallyExpanded = index == 0) }
+            faqs.forEachIndexed { index, faq -> Reveal(delayMillis = index * 60) { FaqCard(faq, initiallyExpanded = index == 0) } }
         }
     }
 }
@@ -45,9 +47,14 @@ fun FaqScreen(widthClass: WidthClass) {
 @Composable
 private fun FaqCard(faq: Faq, initiallyExpanded: Boolean) {
     var expanded by remember { mutableStateOf(initiallyExpanded) }
-    val rotation by animateFloatAsState(if (expanded) 180f else 0f, label = "chevron")
-    OutlinedCard(Modifier.fillMaxWidth()) {
-        Column(Modifier.clickable { expanded = !expanded }.padding(20.dp)) {
+    val rotation by animateFloatAsState(if (expanded) 180f else 0f, spring(dampingRatio = Spring.DampingRatioMediumBouncy), label = "chevron")
+    OutlinedCard(Modifier.fillMaxWidth().hoverLift()) {
+        Column(
+            Modifier
+                .clickable { expanded = !expanded }
+                .animateContentSize(spring(dampingRatio = Spring.DampingRatioLowBouncy, stiffness = Spring.StiffnessMediumLow))
+                .padding(20.dp),
+        ) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 Text(faq.question, style = MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f))
                 Icon(
@@ -57,7 +64,7 @@ private fun FaqCard(faq: Faq, initiallyExpanded: Boolean) {
                     tint = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
-            AnimatedVisibility(visible = expanded, enter = expandVertically(), exit = shrinkVertically()) {
+            AnimatedVisibility(visible = expanded, enter = expandVertically() + fadeIn(), exit = shrinkVertically() + fadeOut()) {
                 Column(Modifier.padding(top = 12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     faq.answer.forEach { line ->
                         Text(line, style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
