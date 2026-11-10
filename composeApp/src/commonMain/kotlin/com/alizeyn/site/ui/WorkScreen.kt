@@ -14,9 +14,11 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.MaterialShapes
-import androidx.compose.material3.toShape
-import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Color
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.layout.width
@@ -36,7 +38,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.Dp
@@ -149,74 +150,53 @@ private fun AppRow(app: App, onOpen: () -> Unit) {
     }
 }
 /**
- * In the style of the cards on m3.material.io: a coloured header band carrying the logo, company
- * and title, with an expressive shape peeking in from the edge, and the body text below.
- * The header opens the company's LinkedIn page.
+ * In the style of the cards on m3.material.io: a tall dark banner framed by a grid pattern with
+ * the company set large in the middle, then a plain text body: dates, title, summary and the
+ * details. The banner opens the company's LinkedIn page.
  */
 @Composable
 private fun RoleCard(role: Role, index: Int, modifier: Modifier = Modifier) {
     val uriHandler = LocalUriHandler.current
-    val scheme = MaterialTheme.colorScheme
-    val (header, onHeader) = listOf(
-        scheme.primaryContainer to scheme.onPrimaryContainer,
-        scheme.tertiaryContainer to scheme.onTertiaryContainer,
-        scheme.secondaryContainer to scheme.onSecondaryContainer,
-        scheme.surfaceContainerHighest to scheme.onSurface,
+    val (field, ink) = listOf(
+        Color(0xFF0D2B1C) to Color(0xFF5CFF9F),
+        Color(0xFF0E2A2A) to Color(0xFF8DD3C8),
+        Color(0xFF1B1540) to Color(0xFFCDA4FF),
+        Color(0xFF2A1B10) to Color(0xFFFFB874),
     )[index % 4]
-    val decoration = listOf(MaterialShapes.Cookie9Sided, MaterialShapes.Sunny, MaterialShapes.Clover8Leaf, MaterialShapes.Pill)[index % 4].toShape()
 
     ElevatedCard(modifier.fillMaxWidth().hoverLift(), shape = MaterialTheme.shapes.extraLarge) {
         Column {
             Box(
                 Modifier
                     .fillMaxWidth()
-                    .height(116.dp)
-                    .background(header)
-                    .clipToBounds()
+                    .aspectRatio(2f)
+                    .background(field)
+                    .gridFrame(field, ink.copy(alpha = 0.55f))
                     .clickable { uriHandler.openUri(role.linkedin) },
-                contentAlignment = Alignment.CenterStart,
+                contentAlignment = Alignment.Center,
             ) {
-                Box(
-                    Modifier
-                        .align(Alignment.CenterEnd)
-                        .offset(x = 40.dp, y = 30.dp)
-                        .size(150.dp)
-                        .clip(decoration)
-                        .background(onHeader.copy(alpha = 0.10f)),
-                )
-                Row(
-                    Modifier.padding(20.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(16.dp),
-                ) {
-                    Box(
-                        Modifier
-                            .size(64.dp)
-                            .clip(MaterialTheme.shapes.large)
-                            .background(scheme.surfaceContainerLowest),
-                        contentAlignment = Alignment.Center,
-                    ) {
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                    Box(Modifier.size(48.dp).clip(MaterialTheme.shapes.medium).background(Color.White), contentAlignment = Alignment.Center) {
                         Image(
                             painter = painterResource(role.logo),
                             contentDescription = "${role.company} logo",
                             contentScale = ContentScale.Fit,
-                            modifier = Modifier.size(48.dp).clip(MaterialTheme.shapes.small),
+                            modifier = Modifier.size(36.dp).clip(MaterialTheme.shapes.extraSmall),
                         )
                     }
-                    Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                        Text(role.company, style = MaterialTheme.typography.titleLargeEmphasized, color = onHeader)
-                        Text(role.title, style = MaterialTheme.typography.bodyMedium, color = onHeader.copy(alpha = 0.85f))
-                        Text(role.period, style = MaterialTheme.typography.labelMedium, color = onHeader.copy(alpha = 0.7f))
-                    }
-                    Icon(
-                        painterResource(Res.drawable.ic_open_in_new),
-                        contentDescription = "${role.company} on LinkedIn",
-                        tint = onHeader.copy(alpha = 0.8f),
-                        modifier = Modifier.size(18.dp),
-                    )
+                    Text(role.company, style = MaterialTheme.typography.displaySmallEmphasized, color = ink)
                 }
+                Icon(
+                    painterResource(Res.drawable.ic_open_in_new),
+                    contentDescription = "${role.company} on LinkedIn",
+                    tint = ink.copy(alpha = 0.8f),
+                    modifier = Modifier.align(Alignment.TopEnd).padding(16.dp).size(18.dp),
+                )
             }
-            Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            Column(Modifier.padding(24.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                Text(role.period, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text(role.title, style = MaterialTheme.typography.headlineSmallEmphasized, color = MaterialTheme.colorScheme.onSurface)
+                Text(role.summary, style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     AssistChip(
                         onClick = {},
@@ -229,7 +209,6 @@ private fun RoleCard(role: Role, index: Int, modifier: Modifier = Modifier) {
                         leadingIcon = { Icon(Icons.Filled.Place, contentDescription = null, modifier = Modifier.size(AssistChipDefaults.IconSize)) },
                     )
                 }
-                Text(role.summary, style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                     role.highlights.forEach { line ->
                         Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -244,4 +223,17 @@ private fun RoleCard(role: Role, index: Int, modifier: Modifier = Modifier) {
             }
         }
     }
+}
+
+/** The m3.material.io banner grid: thin cells around the edge, the middle left as a clear window. */
+private fun Modifier.gridFrame(field: Color, line: Color): Modifier = drawBehind {
+    val cell = 44.dp.toPx()
+    val stroke = 1.dp.toPx()
+    var x = 0f
+    while (x <= size.width + 1f) { drawLine(line, Offset(x, 0f), Offset(x, size.height), stroke); x += cell }
+    var y = 0f
+    while (y <= size.height + 1f) { drawLine(line, Offset(0f, y), Offset(size.width, y), stroke); y += cell }
+    val insetX = cell * 1.5f
+    val insetY = cell * 1f
+    drawRect(field, topLeft = Offset(insetX, insetY), size = Size(size.width - 2 * insetX, size.height - 2 * insetY))
 }
