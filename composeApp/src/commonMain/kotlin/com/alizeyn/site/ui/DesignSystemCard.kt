@@ -16,7 +16,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -25,16 +24,12 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Checkbox
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -198,18 +193,7 @@ private fun TypeRamp() {
 
 @Composable
 private fun Controls(wave: Float, onWave: (Float) -> Unit) {
-    var on by remember { mutableStateOf(true) }
-    var checked by remember { mutableStateOf(true) }
-    val progress by animateFloatAsState(wave, spring(stiffness = Spring.StiffnessLow), label = "progress")
-    Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-            Switch(checked = on, onCheckedChange = { on = it })
-            Checkbox(checked = checked, onCheckedChange = { checked = it })
-            Spacer(Modifier.width(4.dp))
-            LinearProgressIndicator(progress = { progress }, modifier = Modifier.weight(1f))
-        }
-        Slider(value = wave, onValueChange = onWave, enabled = on)
-    }
+    Slider(value = wave, onValueChange = onWave, modifier = Modifier.fillMaxWidth())
 }
 
 /** The Android robot, drawn in a 100×100 unit box. [wave] raises the right arm from 0 (down) to 1 (up). */
@@ -236,7 +220,7 @@ private fun Bugdroid(wave: Float, size: Dp) {
 
 private fun DrawScope.drawBugdroid(u: Float, armAngle: Float, eye: Color, outline: Color) {
     val green = AndroidGreen
-    val stroke = Stroke(width = 1.8f * u, join = StrokeJoin.Round)
+    val stroke = Stroke(width = 1.1f * u, join = StrokeJoin.Round)
     fun r(x: Float, y: Float, w: Float, h: Float) = Rect(x * u, y * u, (x + w) * u, (y + h) * u)
     fun part(path: Path) {
         drawPath(path, green)
@@ -259,10 +243,10 @@ private fun DrawScope.drawBugdroid(u: Float, armAngle: Float, eye: Color, outlin
     // Eyes.
     drawCircle(eye, radius = 2.6f * u, center = Offset(41f * u, 29f * u))
     drawCircle(eye, radius = 2.6f * u, center = Offset(59f * u, 29f * u))
-    // Body, rounded only at the bottom, then legs.
+    // Legs first, tucked under the body so only their lower part shows; then the body over them.
+    part(bottomRounded(r(36f, 72f, 8f, 20f), 4f * u))
+    part(bottomRounded(r(56f, 72f, 8f, 20f), 4f * u))
     part(bottomRounded(r(26f, 41f, 48f, 37f), 8f * u))
-    part(bottomRounded(r(36f, 76f, 8f, 16f), 4f * u))
-    part(bottomRounded(r(56f, 76f, 8f, 16f), 4f * u))
     // Left arm, resting.
     capsule(Offset(16f * u, 41f * u), Size(8f * u, 30f * u), 4f * u)
     // Right arm, pivoting at its shoulder, drawn last so it passes over the body.

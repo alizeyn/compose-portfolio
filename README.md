@@ -24,8 +24,7 @@ composeApp/src/
     data/Cv.kt              all copy, in one place
     theme/                  M3 colour schemes, shape scale, type scale
     ui/Common.kt            Page container, section header, banner, accent paragraphs
-    ui/*Screen.kt           Home (with About), Work, Lab, Contact
-    ui/lab/                 Components ported from the Zone5 and Pushups Android apps
+    ui/*Screen.kt           Home (with About), Work, Contact
   commonMain/composeResources/drawable/   photographs and vector icons
   wasmJsMain/kotlin/.../main.kt           ComposeViewport entry point
   wasmJsMain/resources/   index.html shell, styles.css, favicon

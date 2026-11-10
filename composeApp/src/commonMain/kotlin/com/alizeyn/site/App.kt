@@ -59,13 +59,11 @@ import com.alizeyn.site.data.Profile
 import com.alizeyn.site.resources.Res
 import com.alizeyn.site.resources.ic_dark_mode
 import com.alizeyn.site.resources.ic_light_mode
-import com.alizeyn.site.resources.ic_science
 import com.alizeyn.site.resources.ic_work
 import com.alizeyn.site.theme.SiteTheme
 import com.alizeyn.site.ui.ContactScreen
 import com.alizeyn.site.ui.HomeScreen
 import com.alizeyn.site.ui.WorkScreen
-import com.alizeyn.site.ui.lab.LabScreen
 import org.jetbrains.compose.resources.painterResource
 import kotlinx.coroutines.launch
 
@@ -81,7 +79,6 @@ fun widthClassFor(width: Dp): WidthClass = when {
 enum class Destination(val label: String, val route: String) {
     Home("Home", "home"),
     Work("Work", "work"),
-    Lab("Lab", "lab"),
     Contact("Contact", "contact");
 
     companion object {
@@ -95,7 +92,6 @@ private fun DestinationIcon(destination: Destination, selected: Boolean) {
     when (destination) {
         Destination.Home -> Icon(if (selected) Icons.Filled.Home else Icons.Outlined.Home, contentDescription = null)
         Destination.Work -> Icon(painterResource(Res.drawable.ic_work), contentDescription = null)
-        Destination.Lab -> Icon(painterResource(Res.drawable.ic_science), contentDescription = null)
         Destination.Contact -> Icon(if (selected) Icons.Filled.Email else Icons.Outlined.Email, contentDescription = null)
     }
 }
@@ -280,7 +276,6 @@ private fun Content(
             when (target) {
                 Destination.Home -> HomeScreen(widthClass, onEmail = onEmail, onWork = { onDestination(Destination.Work) })
                 Destination.Work -> WorkScreen(widthClass)
-                Destination.Lab -> LabScreen(widthClass)
                 Destination.Contact -> ContactScreen(widthClass, onEmail = onEmail)
             }
         }
