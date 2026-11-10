@@ -23,8 +23,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Email
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.outlined.Email
 import androidx.compose.material.icons.outlined.Home
@@ -60,6 +58,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.alizeyn.site.data.Profile
 import com.alizeyn.site.resources.Res
+import com.alizeyn.site.resources.ic_all_inclusive
 import com.alizeyn.site.resources.ic_dark_mode
 import com.alizeyn.site.resources.ic_light_mode
 import com.alizeyn.site.resources.ic_work
@@ -97,7 +96,7 @@ private fun DestinationIcon(destination: Destination, selected: Boolean) {
     when (destination) {
         Destination.Home -> Icon(if (selected) Icons.Filled.Home else Icons.Outlined.Home, contentDescription = null)
         Destination.Work -> Icon(painterResource(Res.drawable.ic_work), contentDescription = null)
-        Destination.Beyond -> Icon(if (selected) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder, contentDescription = null)
+        Destination.Beyond -> Icon(painterResource(Res.drawable.ic_all_inclusive), contentDescription = null)
         Destination.Contact -> Icon(if (selected) Icons.Filled.Email else Icons.Outlined.Email, contentDescription = null)
     }
 }

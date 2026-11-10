@@ -38,10 +38,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material3.ElevatedCard
@@ -149,10 +147,15 @@ private fun lookFor(platform: Platform): Look {
             cardRadius = 28.dp, cardFill = Color.White.copy(alpha = 0.55f), cardBorder = Color.White.copy(alpha = 0.85f),
             chipRadius = 20.dp, chipFill = Color.White.copy(alpha = 0.7f), onChip = Color(0xFF1C1C1E), family = FontFamily.SansSerif,
         )
-        Platform.Figma -> Look(
+        Platform.Figma -> if (dark) Look(
             bgTop = Color(0xFF1E1E1E), bgBottom = Color(0xFF2C2C2C), onBg = Color(0xFFFFFFFF), muted = Color(0xFFB3B3B3), accent = Color(0xFF0D99FF),
             cardRadius = 8.dp, cardFill = Color(0xFF2C2C2C), cardBorder = Color(0xFF444444),
             chipRadius = 4.dp, chipFill = Color(0xFF383838), onChip = Color(0xFFE6E6E6), family = FontFamily.Monospace,
+        ) else Look(
+            // Figma's light UI: the pale canvas, white panels, hairline borders.
+            bgTop = Color(0xFFF5F5F5), bgBottom = Color(0xFFE9E9E9), onBg = Color(0xFF1E1E1E), muted = Color(0xFF6F6F6F), accent = Color(0xFF0D99FF),
+            cardRadius = 8.dp, cardFill = Color(0xFFFFFFFF), cardBorder = Color(0xFFE0E0E0),
+            chipRadius = 4.dp, chipFill = Color(0xFFF0F0F0), onChip = Color(0xFF2C2C2C), family = FontFamily.Monospace,
         )
         Platform.Web -> Look(
             bgTop = scheme.background, bgBottom = scheme.background, onBg = scheme.onBackground, muted = scheme.onSurfaceVariant, accent = scheme.primary,
@@ -193,47 +196,51 @@ fun BeyondScreen(widthClass: WidthClass) {
             },
     ) {
         Decor(platform, compact = widthClass == WidthClass.Compact, Modifier.fillMaxSize())
+        // Fixed slots keep "Ali ♥ [" and the pills exactly where they are while the content changes.
+        val compact = widthClass == WidthClass.Compact
         Column(
-            Modifier
-                .fillMaxSize()
-                .verticalScroll(rememberScrollState())
-                .padding(horizontal = widthClass.margin(), vertical = 32.dp),
+            Modifier.fillMaxSize().padding(horizontal = widthClass.margin(), vertical = 32.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center,
         ) {
-            Headline(platform, onBg, accent, compact = widthClass == WidthClass.Compact)
+            Headline(platform, onBg, compact = compact)
             Spacer(Modifier.height(28.dp))
-            PlatformCard(platform, look, Modifier.widthIn(max = 560.dp))
+            Box(Modifier.widthIn(max = 560.dp).fillMaxWidth().height(if (compact) 390.dp else 290.dp), contentAlignment = Alignment.TopCenter) {
+                PlatformCard(platform, look, Modifier.fillMaxWidth())
+            }
             Spacer(Modifier.height(24.dp))
             Selector(index, progress.value, accent, onBg) { i -> index = i; lastTap++ }
         }
     }
 }
 
+private val HeartRed = Color(0xFFE5393E)
+
 @Composable
-private fun Headline(platform: Platform, onBg: Color, accent: Color, compact: Boolean) {
+private fun Headline(platform: Platform, onBg: Color, compact: Boolean) {
     val style = if (compact) MaterialTheme.typography.displayMedium else MaterialTheme.typography.displayLarge
-    val beat by rememberInfiniteTransition(label = "heart").animateFloat(
-        initialValue = 1f, targetValue = 1.18f,
-        animationSpec = infiniteRepeatable(tween(650), RepeatMode.Reverse), label = "beat",
-    )
+    val iconSize = if (compact) 30.dp else 44.dp
     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(if (compact) 8.dp else 14.dp)) {
         Text("Ali", style = style, fontWeight = FontWeight.SemiBold, color = onBg)
         Icon(
-            Icons.Filled.Favorite, contentDescription = "loves", tint = accent,
-            modifier = Modifier.size(if (compact) 30.dp else 44.dp).graphicsLayer { scaleX = beat; scaleY = beat },
+            Icons.Filled.Favorite, contentDescription = "loves", tint = HeartRed,
+            modifier = Modifier.size(iconSize),
         )
         Text("[", style = style, color = onBg.copy(alpha = 0.45f))
-        AnimatedContent(
-            targetState = platform,
-            transitionSpec = {
-                (slideInVertically { it / 2 } + fadeIn()) togetherWith (slideOutVertically { -it / 2 } + fadeOut())
-            },
-            label = "platform",
-        ) { p ->
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                PlatformIcon(p, accent, size = if (compact) 30.dp else 44.dp)
-                Text(p.label, style = style, fontWeight = FontWeight.Bold, color = accent)
+        // The slot is as wide as the longest platform word, so the brackets never move.
+        Box(Modifier.width(if (compact) 172.dp else 232.dp), contentAlignment = Alignment.Center) {
+            AnimatedContent(
+                targetState = platform,
+                transitionSpec = {
+                    (slideInVertically { it / 2 } + fadeIn()) togetherWith (slideOutVertically { -it / 2 } + fadeOut())
+                },
+                label = "platform",
+            ) { p ->
+                val accent = lookFor(p).accent
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                    PlatformIcon(p, accent, size = iconSize)
+                    Text(p.label, style = style, fontWeight = FontWeight.Bold, color = accent)
+                }
             }
         }
         Text("]", style = style, color = onBg.copy(alpha = 0.45f))
@@ -401,7 +408,8 @@ private fun BoxScope.GlassBlobs() {
 
 @Composable
 private fun BoxScope.FigmaCanvas() {
-    val dot = Color.White.copy(alpha = 0.10f)
+    val dark = MaterialTheme.colorScheme.background.luminance() < 0.5f
+    val dot = if (dark) Color.White.copy(alpha = 0.10f) else Color.Black.copy(alpha = 0.10f)
     Canvas(Modifier.fillMaxSize()) {
         val step = 24.dp.toPx()
         var y = step / 2
@@ -413,8 +421,9 @@ private fun BoxScope.FigmaCanvas() {
     }
     val t by rememberInfiniteTransition(label = "cursors").animateFloat(0f, 1f, infiniteRepeatable(tween(9000, easing = LinearEasing)), label = "t")
     val a = t * 2f * 3.1416f
-    Cursor("Ali", Color(0xFF0ACF83), Alignment.TopEnd, Offset(-120f + 30f * cos(a), 120f + 24f * sin(a * 1.3f)))
-    Cursor("Designer", Color(0xFFA259FF), Alignment.BottomStart, Offset(140f + 26f * sin(a), -140f + 20f * cos(a * 0.8f)))
+    // Kept to the corners so they never sit on the headline or the pills.
+    Cursor("Ali", Color(0xFF0ACF83), Alignment.TopEnd, Offset(-96f + 28f * cos(a), 40f + 22f * sin(a * 1.3f)))
+    Cursor("Designer", Color(0xFFA259FF), Alignment.BottomStart, Offset(40f + 26f * sin(a), -72f + 18f * cos(a * 0.8f)))
 }
 
 @Composable
@@ -423,18 +432,20 @@ private fun BoxScope.Cursor(name: String, color: Color, align: Alignment, offset
         Modifier.align(align).offset { IntOffset(offset.x.dp.roundToPx(), offset.y.dp.roundToPx()) },
         verticalAlignment = Alignment.Top,
     ) {
-        Canvas(Modifier.size(18.dp)) {
+        Canvas(Modifier.size(20.dp)) {
+            // The classic pointer: tip at the top-left, barb to the lower right.
+            val u = size.width / 24f
             val p = Path().apply {
-                moveTo(0f, 0f); lineTo(size.width * 0.95f, size.height * 0.55f); lineTo(size.width * 0.55f, size.height * 0.6f)
-                lineTo(size.width * 0.7f, size.height); lineTo(size.width * 0.55f, size.height * 1f); lineTo(size.width * 0.4f, size.height * 0.68f); close()
+                moveTo(4f * u, 2f * u); lineTo(4f * u, 20f * u); lineTo(8.6f * u, 15.8f * u); lineTo(12.2f * u, 22f * u)
+                lineTo(15f * u, 20.6f * u); lineTo(11.5f * u, 14.6f * u); lineTo(18f * u, 14.6f * u); close()
             }
-            drawPath(p, color); drawPath(p, Color.White, style = Stroke(1.5.dp.toPx()))
+            drawPath(p, color); drawPath(p, Color.White, style = Stroke(1.5f * u))
         }
         Text(
             name,
             style = MaterialTheme.typography.labelMedium.copy(fontFamily = FontFamily.Monospace),
             color = Color.White,
-            modifier = Modifier.offset(x = 10.dp, y = 14.dp).clip(RoundedCornerShape(4.dp)).background(color).padding(horizontal = 8.dp, vertical = 3.dp),
+            modifier = Modifier.offset(x = 6.dp, y = 18.dp).clip(RoundedCornerShape(4.dp)).background(color).padding(horizontal = 8.dp, vertical = 3.dp),
         )
     }
 }
