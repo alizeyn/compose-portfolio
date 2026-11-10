@@ -53,8 +53,6 @@ private data class Fact(val icon: DrawableResource, val title: String, val body:
 
 private val facts = listOf(
     Fact(Res.drawable.ic_school, "Studied", "B.Sc. Software Engineering, Ferdowsi University of Mashhad, 2015–2019."),
-    Fact(Res.drawable.ic_palette, "Leaning into", "Component libraries, Material 3, and the handshake between design and engineering."),
-    Fact(Res.drawable.ic_work, "Mentoring", "Taught Android at Ferdowsi University; onboarded new developers at Neshan."),
     Fact(Res.drawable.ic_language, "Languages", "Persian natively, English fluently, German at B1."),
     Fact(Res.drawable.ic_camera, "Off hours", "Generative art, producing music, photography, hiking, and a lot of tea."),
 )

@@ -29,7 +29,7 @@ object Profile {
     const val linkedin = "https://www.linkedin.com/in/alizeynali/"
     const val github = "https://github.com/alizeyn"
     const val location = "Vienna, Austria"
-    const val tagline = "Ten years of Android, from Java to Jetpack Compose. I build the UI components other teams build with."
+    const val tagline = "Ten years of Android, from Java to Jetpack Compose."
 }
 
 val about: List<Paragraph> = listOf(
@@ -38,21 +38,7 @@ val about: List<Paragraph> = listOf(
         accent("Jetpack Compose"),
         plain(", for products with more than 10 million users. The constant through all of it: the UI layer is where I do my best work."),
     ),
-    listOf(
-        plain("At shopreme I learned to think like a "),
-        accent("library author"),
-        plain(": a clean public API surface with the internals kept internal, parity with iOS, deprecation instead of breaking changes, and documentation and changelogs people actually read. That is exactly the mindset a design-system component library needs."),
-    ),
-    listOf(
-        plain("I care about design as much as code. I prototype, I argue about spacing and motion, and I read a "),
-        accent("Figma"),
-        plain(" file as fluently as a stack trace. Over the past year I've folded AI tooling into everyday work, from prototyping to implementation."),
-    ),
-    listOf(
-        plain("This site is a small proof: "),
-        accent("Compose Multiplatform drawn with Material 3"),
-        plain(", adaptive navigation per window size class, light and dark schemes, and a GitHub Actions pipeline that ships every push."),
-    ),
+    listOf(plain("[ Will be written by myself later ]")),
 )
 
 data class Role(
