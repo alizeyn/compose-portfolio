@@ -1,6 +1,11 @@
 package com.alizeyn.site.data
 
 import com.alizeyn.site.resources.Res
+import com.alizeyn.site.resources.app_billa
+import com.alizeyn.site.resources.app_neshan
+import com.alizeyn.site.resources.app_ohana
+import com.alizeyn.site.resources.app_pushups
+import com.alizeyn.site.resources.app_zone5
 import com.alizeyn.site.resources.logo_foxyfitness
 import com.alizeyn.site.resources.logo_neshan
 import com.alizeyn.site.resources.logo_ohana
@@ -57,6 +62,8 @@ data class Role(
     val arrangement: String,
     val place: String,
     val logo: DrawableResource,
+    /** The company page on LinkedIn. */
+    val linkedin: String,
     val summary: String,
     val highlights: List<String>,
     val stack: List<String>,
@@ -70,6 +77,7 @@ val roles: List<Role> = listOf(
         arrangement = "Hybrid",
         place = "Linz",
         logo = Res.drawable.logo_foxyfitness,
+        linkedin = "https://www.linkedin.com/company/foxyfitness/",
         summary = "Fitness start-up. A small team, so everyone wears several hats.",
         highlights = listOf(
             "Integrated AI tooling into the everyday workflow, from prototyping to implementation.",
@@ -84,6 +92,7 @@ val roles: List<Role> = listOf(
         arrangement = "Remote",
         place = "Linz",
         logo = Res.drawable.logo_ohana,
+        linkedin = "https://www.linkedin.com/company/ohana-software-gmbh/",
         summary = "Parental-control app that helps families build healthy screen-time routines.",
         highlights = listOf(
             "Compose everywhere: daily feature work, a migration of the whole app to Jetpack Navigation, and shared styles and components adopted across modules.",
@@ -101,6 +110,7 @@ val roles: List<Role> = listOf(
         arrangement = "On-site",
         place = "Graz",
         logo = Res.drawable.logo_shopreme,
+        linkedin = "https://www.linkedin.com/company/shopreme-self-checkout/",
         summary = "Scan & Go SDK and self-checkout platform used by brands like Rewe, Auchan and ALDI.",
         highlights = listOf(
             "SDK mindset: a clean public API surface with internals kept internal, API parity with iOS, and a deprecation policy so patch releases never break anyone.",
@@ -118,6 +128,7 @@ val roles: List<Role> = listOf(
         arrangement = "Hybrid",
         place = "Mashhad",
         logo = Res.drawable.logo_neshan,
+        linkedin = "https://www.linkedin.com/company/neshanmaps/",
         summary = "Maps and navigation used by 10 million people in Iran, localised down to the speed bumps.",
         highlights = listOf(
             "Right-to-left from day one: Persian and Arabic layouts and typography on small screens, and the UI/UX challenges that come with them.",
@@ -177,4 +188,23 @@ val faqs: List<Faq> = listOf(
         question = "Do you have, like hobbies?",
         answer = listOf("Generative art, producing music, photography, hiking. Huge fan of tea, and coffee when the tea runs out."),
     ),
+)
+
+/** An app on the Play Store that I shipped or built the SDK for. */
+data class App(
+    val name: String,
+    val company: String,
+    val blurb: String,
+    val screenshot: DrawableResource,
+    val playUrl: String,
+)
+
+private fun play(id: String) = "https://play.google.com/store/apps/details?id=$id"
+
+val apps: List<App> = listOf(
+    App("Zone5", "Foxyfitness", "Camera-coached workouts that keep you in the zone.", Res.drawable.app_zone5, play("app.foxyfitness.android.zone5")),
+    App("Push Up Counter", "Foxyfitness", "Automatic push-up counting, plans and leaderboards.", Res.drawable.app_pushups, play("app.foxyfitness.pushups")),
+    App("Ohana", "Ohana", "Parental controls: screen time, app blocks and routines.", Res.drawable.app_ohana, play("com.tryohana.android")),
+    App("BILLA Scan & Go", "shopreme", "Scan, pay and go, built on the shopreme SDK.", Res.drawable.app_billa, play("at.billa.scanandpay")),
+    App("Neshan", "Neshan", "Maps and navigation for more than 10 million people.", Res.drawable.app_neshan, play("org.rajman.neshan.traffic.tehran.navigator")),
 )

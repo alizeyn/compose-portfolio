@@ -86,7 +86,7 @@ private fun Hero(widthClass: WidthClass, onEmail: () -> Unit, onWork: () -> Unit
 /** Head-and-shoulders crop of the film-shop photo, in the extra-large rounded rect, over a turning halo. */
 @Composable
 private fun Portrait(size: Dp) {
-    Glow(Modifier.size(size).hoverLift(scale = 1.03f, lift = 4.dp)) {
+    Glow(Modifier.size(size)) {
         Image(
             painter = painterResource(Res.drawable.hero_portrait),
             contentDescription = "Portrait of Ali, smiling, in front of a fern print",
