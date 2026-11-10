@@ -48,6 +48,9 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.StrokeJoin
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.graphics.drawscope.translate
@@ -221,36 +224,50 @@ private fun Bugdroid(wave: Float, size: Dp) {
         label = "bobY",
     )
     val eye = MaterialTheme.colorScheme.surfaceContainerLowest
+    // A dark outline on every part keeps the waving arm legible when it crosses the body.
+    val outline = if (MaterialTheme.colorScheme.background.luminance() < 0.5f) Color(0xFF071009) else Color(0xFF0E5E36)
     Canvas(Modifier.size(size)) {
         val u = this.size.minDimension / 100f
         translate(top = bob * u) {
-            drawBugdroid(u, armAngle, eye)
+            drawBugdroid(u, armAngle, eye, outline)
         }
     }
 }
 
-private fun DrawScope.drawBugdroid(u: Float, armAngle: Float, eye: Color) {
+private fun DrawScope.drawBugdroid(u: Float, armAngle: Float, eye: Color, outline: Color) {
     val green = AndroidGreen
+    val stroke = Stroke(width = 1.8f * u, join = StrokeJoin.Round)
     fun r(x: Float, y: Float, w: Float, h: Float) = Rect(x * u, y * u, (x + w) * u, (y + h) * u)
+    fun part(path: Path) {
+        drawPath(path, green)
+        drawPath(path, outline, style = stroke)
+    }
+    fun capsule(topLeft: Offset, size: Size, radius: Float) {
+        drawRoundRect(green, topLeft = topLeft, size = size, cornerRadius = CornerRadius(radius))
+        drawRoundRect(outline, topLeft = topLeft, size = size, cornerRadius = CornerRadius(radius), style = stroke)
+    }
 
-    // Head: a half disc with a hairline gap above the body.
-    drawArc(green, startAngle = 180f, sweepAngle = 180f, useCenter = true, topLeft = Offset(26f * u, 14f * u), size = Size(48f * u, 48f * u))
-    // Antennae.
-    drawLine(green, Offset(37f * u, 19f * u), Offset(30f * u, 9f * u), strokeWidth = 3f * u, cap = StrokeCap.Round)
-    drawLine(green, Offset(63f * u, 19f * u), Offset(70f * u, 9f * u), strokeWidth = 3f * u, cap = StrokeCap.Round)
+    // Antennae: outline first, then the green core.
+    for ((from, to) in listOf(Offset(37f, 19f) to Offset(30f, 9f), Offset(63f, 19f) to Offset(70f, 9f))) {
+        drawLine(outline, from * u, to * u, strokeWidth = 3f * u + stroke.width * 2f, cap = StrokeCap.Round)
+        drawLine(green, from * u, to * u, strokeWidth = 3f * u, cap = StrokeCap.Round)
+    }
+    // Head: a half disc.
+    val head = Rect(26f * u, 14f * u, 74f * u, 62f * u)
+    drawArc(green, startAngle = 180f, sweepAngle = 180f, useCenter = true, topLeft = head.topLeft, size = head.size)
+    drawArc(outline, startAngle = 180f, sweepAngle = 180f, useCenter = true, topLeft = head.topLeft, size = head.size, style = stroke)
     // Eyes.
     drawCircle(eye, radius = 2.6f * u, center = Offset(41f * u, 29f * u))
     drawCircle(eye, radius = 2.6f * u, center = Offset(59f * u, 29f * u))
-    // Body, rounded only at the bottom.
-    drawPath(bottomRounded(r(26f, 41f, 48f, 37f), 8f * u), green)
-    // Legs.
-    drawPath(bottomRounded(r(36f, 76f, 8f, 16f), 4f * u), green)
-    drawPath(bottomRounded(r(56f, 76f, 8f, 16f), 4f * u), green)
+    // Body, rounded only at the bottom, then legs.
+    part(bottomRounded(r(26f, 41f, 48f, 37f), 8f * u))
+    part(bottomRounded(r(36f, 76f, 8f, 16f), 4f * u))
+    part(bottomRounded(r(56f, 76f, 8f, 16f), 4f * u))
     // Left arm, resting.
-    drawRoundRect(green, topLeft = Offset(16f * u, 41f * u), size = Size(8f * u, 30f * u), cornerRadius = CornerRadius(4f * u))
-    // Right arm, pivoting at its shoulder.
+    capsule(Offset(16f * u, 41f * u), Size(8f * u, 30f * u), 4f * u)
+    // Right arm, pivoting at its shoulder, drawn last so it passes over the body.
     rotate(degrees = armAngle, pivot = Offset(80f * u, 45f * u)) {
-        drawRoundRect(green, topLeft = Offset(76f * u, 41f * u), size = Size(8f * u, 30f * u), cornerRadius = CornerRadius(4f * u))
+        capsule(Offset(76f * u, 41f * u), Size(8f * u, 30f * u), 4f * u)
     }
 }
 
