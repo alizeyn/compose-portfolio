@@ -16,9 +16,13 @@ fun main() {
                     window.history.replaceState(null, "", window.location.pathname + window.location.search + hash)
                 }
             },
-            // Navigating the current window to a mailto: URL hands off to the mail client without
-            // leaving a blank tab behind, which window.open would do on desktop.
-            onEmail = { window.location.href = "mailto:${Profile.email}" },
+            // Copy the address first, then hand the mailto: URL to the current window. Navigating
+            // the current window leaves no blank tab behind, and the copy covers browsers that
+            // have no mail handler configured.
+            onEmail = {
+                window.navigator.clipboard.writeText(Profile.email)
+                window.location.href = "mailto:${Profile.email}"
+            },
         )
     }
 }

@@ -36,6 +36,8 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationRail
 import androidx.compose.material3.NavigationRailItem
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
@@ -44,6 +46,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -64,6 +67,7 @@ import com.alizeyn.site.ui.HomeScreen
 import com.alizeyn.site.ui.WorkScreen
 import com.alizeyn.site.ui.lab.LabScreen
 import org.jetbrains.compose.resources.painterResource
+import kotlinx.coroutines.launch
 
 /** Material 3 window-size classes: compact < 600dp, medium < 840dp, expanded otherwise. */
 enum class WidthClass { Compact, Medium, Expanded }
@@ -109,7 +113,18 @@ fun App(
         var destination by remember { mutableStateOf(initialDestination) }
         LaunchedEffect(destination) { onDestinationChanged(destination) }
         val uriHandler = LocalUriHandler.current
-        val sendEmail = onEmail ?: { uriHandler.openUri("mailto:${Profile.email}") }
+        val snackbar = remember { SnackbarHostState() }
+        val scope = rememberCoroutineScope()
+        // The platform handler copies the address and tries the mail client; the snackbar makes
+        // sure something visible happens even when the browser has no mail handler.
+        val sendEmail = {
+            onEmail?.invoke() ?: uriHandler.openUri("mailto:${Profile.email}")
+            scope.launch {
+                snackbar.currentSnackbarData?.dismiss()
+                snackbar.showSnackbar("${Profile.email} copied. If your mail app didn't open, just paste it.")
+            }
+            Unit
+        }
 
         Surface(Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
             BoxWithConstraints {
@@ -134,6 +149,12 @@ fun App(
                         onEmail = sendEmail,
                     )
                 }
+                SnackbarHost(
+                    hostState = snackbar,
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .padding(bottom = if (widthClass == WidthClass.Compact) 88.dp else 16.dp),
+                )
             }
         }
     }
