@@ -165,12 +165,73 @@ private fun lookFor(platform: Platform): Look {
     }
 }
 
+/**
+ * Colours and type for the app chrome (top bar, navigation bar or rail, FAB, theme toggle)
+ * while a platform is on stage. [materialChrome] is the site's own look.
+ */
+class Chrome(
+    val topBar: Color,
+    val bar: Color,
+    val rail: Color,
+    val content: Color,
+    val selected: Color,
+    val indicator: Color,
+    val unselected: Color,
+    val fabContainer: Color,
+    val fabContent: Color,
+    val family: FontFamily,
+)
+
 @Composable
-fun BeyondScreen(widthClass: WidthClass) {
+fun materialChrome(): Chrome {
+    val s = MaterialTheme.colorScheme
+    return Chrome(
+        topBar = s.background, bar = s.surfaceContainer, rail = s.surfaceContainerLow, content = s.onSurface,
+        selected = s.onSecondaryContainer, indicator = s.secondaryContainer, unselected = s.onSurfaceVariant,
+        fabContainer = s.tertiaryContainer, fabContent = s.onTertiaryContainer, family = FontFamily.Default,
+    )
+}
+
+@Composable
+fun chromeFor(platform: Platform): Chrome {
+    val dark = MaterialTheme.colorScheme.background.luminance() < 0.5f
+    return when (platform) {
+        Platform.Ios -> {
+            val blue = if (dark) Color(0xFF0A84FF) else Color(0xFF007AFF)
+            val glass = if (dark) Color(0xFF1C1C1E).copy(alpha = 0.92f) else Color(0xFFF9F9F9).copy(alpha = 0.92f)
+            Chrome(
+                topBar = glass, bar = glass, rail = glass, content = if (dark) Color(0xFFF2F2F7) else Color(0xFF1C1C1E),
+                selected = blue, indicator = blue.copy(alpha = if (dark) 0.22f else 0.14f), unselected = Color(0xFF8E8E93),
+                fabContainer = blue, fabContent = Color.White, family = FontFamily.SansSerif,
+            )
+        }
+        Platform.Figma -> {
+            val panel = if (dark) Color(0xFF2C2C2C) else Color(0xFFFFFFFF)
+            Chrome(
+                topBar = panel, bar = panel, rail = panel, content = if (dark) Color.White else Color(0xFF1E1E1E),
+                selected = Color.White, indicator = Color(0xFF0D99FF), unselected = if (dark) Color(0xFFB3B3B3) else Color(0xFF7A7A7A),
+                fabContainer = Color(0xFF0D99FF), fabContent = Color.White, family = FontFamily.Monospace,
+            )
+        }
+        Platform.Web -> materialChrome()
+    }
+}
+
+/** Cross-fades every colour so the chrome glides between looks. */
+@Composable
+fun Chrome.animated(): Chrome {
+    @Composable
+    fun c(target: Color) = animateColorAsState(target, tween(700), label = "chrome").value
+    return Chrome(c(topBar), c(bar), c(rail), c(content), c(selected), c(indicator), c(unselected), c(fabContainer), c(fabContent), family)
+}
+
+@Composable
+fun BeyondScreen(widthClass: WidthClass, onPlatform: (Platform) -> Unit = {}) {
     var index by remember { mutableIntStateOf(0) }
     var lastTap by remember { mutableLongStateOf(0L) }
     val progress = remember { Animatable(0f) }
     val platform = Platform.entries[index]
+    LaunchedEffect(platform) { onPlatform(platform) }
 
     // Auto-advance; a tap restarts the dwell for the chosen platform.
     LaunchedEffect(index, lastTap) {

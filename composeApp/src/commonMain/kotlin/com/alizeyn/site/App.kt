@@ -34,6 +34,9 @@ import androidx.compose.material3.FilledTonalIconToggleButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.ShortNavigationBar
 import androidx.compose.material3.ShortNavigationBarItem
+import androidx.compose.material3.ShortNavigationBarItemDefaults
+import androidx.compose.material3.WideNavigationRailDefaults
+import androidx.compose.material3.WideNavigationRailItemDefaults
 import androidx.compose.material3.WideNavigationRail
 import androidx.compose.material3.WideNavigationRailItem
 import androidx.compose.material3.Scaffold
@@ -64,6 +67,11 @@ import com.alizeyn.site.resources.ic_light_mode
 import com.alizeyn.site.resources.ic_work
 import com.alizeyn.site.theme.SiteTheme
 import com.alizeyn.site.ui.BeyondScreen
+import com.alizeyn.site.ui.Chrome
+import com.alizeyn.site.ui.Platform
+import com.alizeyn.site.ui.animated
+import com.alizeyn.site.ui.chromeFor
+import com.alizeyn.site.ui.materialChrome
 import com.alizeyn.site.ui.ContactScreen
 import com.alizeyn.site.ui.HomeScreen
 import com.alizeyn.site.ui.WorkScreen
@@ -113,6 +121,9 @@ fun App(
     SiteTheme(darkTheme = dark) {
         var destination by remember { mutableStateOf(initialDestination) }
         LaunchedEffect(destination) { onDestinationChanged(destination) }
+        // While Beyond is on screen the chrome follows its platform; elsewhere it is plain Material.
+        var platform by remember { mutableStateOf(Platform.Ios) }
+        val chrome = (if (destination == Destination.Beyond) chromeFor(platform) else materialChrome()).animated()
         val uriHandler = LocalUriHandler.current
         val snackbar = remember { SnackbarHostState() }
         val scope = rememberCoroutineScope()
@@ -131,7 +142,7 @@ fun App(
             BoxWithConstraints {
                 val widthClass = widthClassFor(maxWidth)
                 val themeToggle: @Composable () -> Unit = {
-                    ThemeToggle(dark = dark, onToggle = { dark = !dark })
+                    ThemeToggle(dark = dark, onToggle = { dark = !dark }, chrome = chrome)
                 }
 
                 when (widthClass) {
@@ -141,6 +152,8 @@ fun App(
                         themeToggle = themeToggle,
                         widthClass = widthClass,
                         onEmail = sendEmail,
+                        chrome = chrome,
+                        onPlatform = { platform = it },
                     )
                     else -> RailLayout(
                         destination = destination,
@@ -148,6 +161,8 @@ fun App(
                         themeToggle = themeToggle,
                         widthClass = widthClass,
                         onEmail = sendEmail,
+                        chrome = chrome,
+                        onPlatform = { platform = it },
                     )
                 }
                 SnackbarHost(
@@ -162,9 +177,17 @@ fun App(
 }
 
 @Composable
-private fun ThemeToggle(dark: Boolean, onToggle: () -> Unit) {
+private fun ThemeToggle(dark: Boolean, onToggle: () -> Unit, chrome: Chrome) {
     val rotation by animateFloatAsState(if (dark) 180f else 0f, spring(stiffness = 200f, dampingRatio = 0.7f), label = "toggleSpin")
-    FilledTonalIconToggleButton(checked = dark, onCheckedChange = { onToggle() }, shapes = IconButtonDefaults.toggleableShapes()) {
+    FilledTonalIconToggleButton(
+        checked = dark,
+        onCheckedChange = { onToggle() },
+        shapes = IconButtonDefaults.toggleableShapes(),
+        colors = IconButtonDefaults.filledTonalIconToggleButtonColors(
+            containerColor = chrome.indicator, contentColor = chrome.selected,
+            checkedContainerColor = chrome.indicator, checkedContentColor = chrome.selected,
+        ),
+    ) {
         AnimatedContent(
             targetState = dark,
             transitionSpec = { (fadeIn(tween(250)) + scaleIn(initialScale = 0.6f)) togetherWith (fadeOut(tween(150)) + scaleOut(targetScale = 0.6f)) },
@@ -187,27 +210,34 @@ private fun CompactLayout(
     themeToggle: @Composable () -> Unit,
     widthClass: WidthClass,
     onEmail: () -> Unit,
+    chrome: Chrome,
+    onPlatform: (Platform) -> Unit,
 ) {
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             CenterAlignedTopAppBar(
-                title = { Text("${Profile.firstName} ${Profile.lastName}", style = MaterialTheme.typography.titleLarge) },
+                title = { Text("${Profile.firstName} ${Profile.lastName}", style = MaterialTheme.typography.titleLarge, fontFamily = chrome.family) },
                 actions = { themeToggle() },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.background,
+                    containerColor = chrome.topBar,
+                    titleContentColor = chrome.content,
                 ),
             )
         },
         bottomBar = {
-            ShortNavigationBar {
+            ShortNavigationBar(containerColor = chrome.bar) {
                 Destination.entries.forEach { d ->
                     val selected = d == destination
                     ShortNavigationBarItem(
                         selected = selected,
                         onClick = { onDestination(d) },
                         icon = { DestinationIcon(d, selected) },
-                        label = { Text(d.label) },
+                        label = { Text(d.label, fontFamily = chrome.family) },
+                        colors = ShortNavigationBarItemDefaults.colors(
+                            selectedIconColor = chrome.selected, selectedTextColorTopIconPosition = chrome.content, selectedIndicatorColor = chrome.indicator,
+                            unselectedIconColor = chrome.unselected, unselectedTextColor = chrome.unselected,
+                        ),
                     )
                 }
             }
@@ -215,7 +245,7 @@ private fun CompactLayout(
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
     ) { padding ->
         Box(Modifier.fillMaxSize().padding(padding)) {
-            Content(destination, widthClass, onDestination, onEmail)
+            Content(destination, widthClass, onDestination, onEmail, onPlatform)
         }
     }
 }
@@ -227,15 +257,18 @@ private fun RailLayout(
     themeToggle: @Composable () -> Unit,
     widthClass: WidthClass,
     onEmail: () -> Unit,
+    chrome: Chrome,
+    onPlatform: (Platform) -> Unit,
 ) {
     Row(Modifier.fillMaxSize()) {
         Box {
             WideNavigationRail(
+                colors = WideNavigationRailDefaults.colors(containerColor = chrome.rail, contentColor = chrome.content),
                 header = {
                     FloatingActionButton(
                         onClick = onEmail,
-                        containerColor = MaterialTheme.colorScheme.tertiaryContainer,
-                        contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
+                        containerColor = chrome.fabContainer,
+                        contentColor = chrome.fabContent,
                         modifier = Modifier.padding(start = 20.dp, top = 8.dp),
                     ) {
                         Icon(Icons.Outlined.Email, contentDescription = "Send me an email")
@@ -248,15 +281,19 @@ private fun RailLayout(
                         selected = selected,
                         onClick = { onDestination(d) },
                         icon = { DestinationIcon(d, selected) },
-                        label = { Text(d.label) },
+                        label = { Text(d.label, fontFamily = chrome.family) },
                         railExpanded = false,
+                        colors = WideNavigationRailItemDefaults.colors(
+                            selectedIconColor = chrome.selected, selectedTextColorTopIconPosition = chrome.content, selectedIndicatorColor = chrome.indicator,
+                            unselectedIconColor = chrome.unselected, unselectedTextColor = chrome.unselected,
+                        ),
                     )
                 }
             }
             Box(Modifier.align(Alignment.BottomCenter).padding(bottom = 16.dp)) { themeToggle() }
         }
         Box(Modifier.weight(1f).fillMaxSize()) {
-            Content(destination, widthClass, onDestination, onEmail)
+            Content(destination, widthClass, onDestination, onEmail, onPlatform)
         }
     }
 }
@@ -267,6 +304,7 @@ private fun Content(
     widthClass: WidthClass,
     onDestination: (Destination) -> Unit,
     onEmail: () -> Unit,
+    onPlatform: (Platform) -> Unit,
 ) {
     AnimatedContent(
         targetState = destination,
@@ -280,7 +318,7 @@ private fun Content(
             when (target) {
                 Destination.Home -> HomeScreen(widthClass, onEmail = onEmail, onWork = { onDestination(Destination.Work) })
                 Destination.Work -> WorkScreen(widthClass)
-                Destination.Beyond -> BeyondScreen(widthClass)
+                Destination.Beyond -> BeyondScreen(widthClass, onPlatform = onPlatform)
                 Destination.Contact -> ContactScreen(widthClass, onEmail = onEmail)
             }
         }
