@@ -26,7 +26,8 @@ import androidx.compose.ui.unit.dp
 import com.alizeyn.site.WidthClass
 import com.alizeyn.site.data.Profile
 import com.alizeyn.site.resources.Res
-import com.alizeyn.site.resources.ic_open_in_new
+import com.alizeyn.site.resources.ic_github
+import com.alizeyn.site.resources.ic_linkedin
 import org.jetbrains.compose.resources.painterResource
 
 @Composable
@@ -67,14 +68,14 @@ fun ContactScreen(widthClass: WidthClass, onEmail: () -> Unit) {
                 ContactRow(
                     headline = "LinkedIn",
                     supporting = "linkedin.com/in/alizeynali",
-                    leading = { Icon(painterResource(Res.drawable.ic_open_in_new), contentDescription = null) },
+                    leading = { Icon(painterResource(Res.drawable.ic_linkedin), contentDescription = null) },
                     onClick = { uriHandler.openUri(Profile.linkedin) },
                 )
                 HorizontalDivider(Modifier.padding(horizontal = 16.dp))
                 ContactRow(
                     headline = "GitHub",
                     supporting = "github.com/alizeyn",
-                    leading = { Icon(painterResource(Res.drawable.ic_open_in_new), contentDescription = null) },
+                    leading = { Icon(painterResource(Res.drawable.ic_github), contentDescription = null) },
                     onClick = { uriHandler.openUri(Profile.github) },
                 )
                 HorizontalDivider(Modifier.padding(horizontal = 16.dp))

@@ -54,7 +54,7 @@ import com.alizeyn.site.resources.Res
 import com.alizeyn.site.resources.hero_portrait
 import com.alizeyn.site.resources.ic_camera
 import com.alizeyn.site.resources.ic_language
-import com.alizeyn.site.resources.ic_open_in_new
+import com.alizeyn.site.resources.ic_linkedin
 import com.alizeyn.site.resources.ic_palette
 import com.alizeyn.site.resources.ic_school
 import com.alizeyn.site.resources.ic_work
@@ -206,9 +206,9 @@ private fun HeroCopy(modifier: Modifier, onEmail: () -> Unit, onWork: () -> Unit
                 modifier = Modifier.heightIn(height),
                 contentPadding = ButtonDefaults.contentPaddingFor(height),
             ) {
-                Text("LinkedIn", style = ButtonDefaults.textStyleFor(height))
+                Icon(painterResource(Res.drawable.ic_linkedin), contentDescription = null, modifier = Modifier.size(ButtonDefaults.iconSizeFor(height)))
                 Spacer(Modifier.size(ButtonDefaults.iconSpacingFor(height)))
-                Icon(painterResource(Res.drawable.ic_open_in_new), contentDescription = "opens in a new tab", modifier = Modifier.size(ButtonDefaults.iconSizeFor(height)))
+                Text("LinkedIn", style = ButtonDefaults.textStyleFor(height))
             }
             OutlinedButton(
                 onClick = onWork,
