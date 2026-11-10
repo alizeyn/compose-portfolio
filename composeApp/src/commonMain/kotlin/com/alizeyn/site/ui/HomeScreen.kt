@@ -85,8 +85,9 @@ private fun Hero(widthClass: WidthClass, onEmail: () -> Unit, onWork: () -> Unit
     when (widthClass) {
         // Phones: portrait and the three chips share one row, then the copy below.
         WidthClass.Compact -> Column(verticalArrangement = Arrangement.spacedBy(20.dp)) {
-            Row(horizontalArrangement = Arrangement.spacedBy(16.dp), verticalAlignment = Alignment.CenterVertically) {
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
                 Reveal(pop = true) { Portrait(size = 128.dp) }
+                // Chips hug the trailing edge, right-aligned.
                 Reveal(delayMillis = 60) { HeroChips(onWork, stacked = true) }
             }
             HeroCopy(Modifier.fillMaxWidth(), onEmail, onWork, withChips = false)
@@ -126,7 +127,7 @@ private fun HeroChips(onWork: () -> Unit, stacked: Boolean) {
         )
     }
     if (stacked) {
-        Column(verticalArrangement = Arrangement.spacedBy(4.dp), horizontalAlignment = Alignment.Start) { chips() }
+        Column(verticalArrangement = Arrangement.spacedBy(4.dp), horizontalAlignment = Alignment.End) { chips() }
     } else {
         FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) { chips() }
     }
