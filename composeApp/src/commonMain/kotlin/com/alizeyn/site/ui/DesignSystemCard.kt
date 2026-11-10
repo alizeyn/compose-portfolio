@@ -16,19 +16,25 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -43,11 +49,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.StrokeJoin
-import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.luminance
+import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.graphics.drawscope.translate
-import androidx.compose.ui.graphics.luminance
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -55,45 +62,54 @@ import com.alizeyn.site.WidthClass
 import com.alizeyn.site.theme.AndroidGreen
 
 /**
- * A compact specimen of this page's design system: the six accent roles, the shape and type
- * scales, and a bugdroid you wave with the slider. Everything reads from [MaterialTheme], so it
- * cross-fades with the theme toggle.
+ * A small specimen sheet of this very page's design system: colour roles, shape and type
+ * scales, a handful of live Material 3 controls, and a bugdroid you can wave with the slider.
+ * Everything reads from [MaterialTheme], so it cross-fades with the theme toggle.
  */
 @Composable
 fun DesignSystemCard(widthClass: WidthClass) {
     var wave by remember { mutableFloatStateOf(0.35f) }
 
     Card(
-        shape = MaterialTheme.shapes.large,
+        shape = MaterialTheme.shapes.extraLarge,
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
         modifier = Modifier.fillMaxWidth(),
     ) {
         if (widthClass == WidthClass.Compact) {
-            Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
                 Eyebrow()
-                Palette(showLabels = false)
-                Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
-                    Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                Palette()
+                Row(horizontalArrangement = Arrangement.spacedBy(16.dp), verticalAlignment = Alignment.CenterVertically) {
+                    Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(14.dp)) {
                         ShapeScale()
                         TypeRamp()
                     }
-                    Bugdroid(wave = wave, size = 72.dp)
+                    Bugdroid(wave = wave, size = 88.dp)
                 }
-                Slider(value = wave, onValueChange = { wave = it }, modifier = Modifier.fillMaxWidth())
+                Controls(wave = wave, onWave = { wave = it })
             }
         } else {
-            Row(Modifier.padding(16.dp), horizontalArrangement = Arrangement.spacedBy(20.dp), verticalAlignment = Alignment.CenterVertically) {
-                Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            Row(Modifier.padding(20.dp), horizontalArrangement = Arrangement.spacedBy(28.dp)) {
+                Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(14.dp)) {
                     Eyebrow()
-                    Palette(showLabels = widthClass == WidthClass.Expanded)
-                    Row(horizontalArrangement = Arrangement.spacedBy(20.dp), verticalAlignment = Alignment.Bottom) {
+                    Palette()
+                    if (widthClass == WidthClass.Expanded) {
+                        Row(horizontalArrangement = Arrangement.spacedBy(24.dp), verticalAlignment = Alignment.Bottom) {
+                            ShapeScale()
+                            TypeRamp()
+                        }
+                    } else {
                         ShapeScale()
                         TypeRamp()
                     }
                 }
-                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                    Bugdroid(wave = wave, size = 72.dp)
-                    Slider(value = wave, onValueChange = { wave = it }, modifier = Modifier.width(140.dp))
+                Column(
+                    Modifier.width(if (widthClass == WidthClass.Expanded) 240.dp else 200.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                ) {
+                    Bugdroid(wave = wave, size = 104.dp)
+                    Controls(wave = wave, onWave = { wave = it })
                 }
             }
         }
@@ -106,38 +122,63 @@ private fun Eyebrow() {
 }
 
 @Composable
-private fun Palette(showLabels: Boolean) {
+private fun Palette() {
     val c = MaterialTheme.colorScheme
-    Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-        Swatch("primary", c.primary, c.onPrimary, showLabels, Modifier.weight(1f))
-        Swatch("container", c.primaryContainer, c.onPrimaryContainer, showLabels, Modifier.weight(1f))
-        Swatch("secondary", c.secondary, c.onSecondary, showLabels, Modifier.weight(1f))
-        Swatch("container", c.secondaryContainer, c.onSecondaryContainer, showLabels, Modifier.weight(1f))
-        Swatch("tertiary", c.tertiary, c.onTertiary, showLabels, Modifier.weight(1f))
-        Swatch("container", c.tertiaryContainer, c.onTertiaryContainer, showLabels, Modifier.weight(1f))
-    }
-}
-
-@Composable
-private fun Swatch(role: String, color: Color, onColor: Color, showLabel: Boolean, modifier: Modifier) {
-    BoxWithConstraints(modifier.height(30.dp).clip(MaterialTheme.shapes.small).background(color).padding(horizontal = 6.dp)) {
-        if (showLabel && maxWidth >= 60.dp) {
-            Text(role, style = MaterialTheme.typography.labelSmall, color = onColor, maxLines = 1, softWrap = false, overflow = TextOverflow.Clip, modifier = Modifier.align(Alignment.CenterStart))
+    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+        Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+            Swatch("primary", c.primary, c.onPrimary, Modifier.weight(1f))
+            Swatch("container", c.primaryContainer, c.onPrimaryContainer, Modifier.weight(1f))
+            Swatch("secondary", c.secondary, c.onSecondary, Modifier.weight(1f))
+            Swatch("container", c.secondaryContainer, c.onSecondaryContainer, Modifier.weight(1f))
+            Swatch("tertiary", c.tertiary, c.onTertiary, Modifier.weight(1f))
+            Swatch("container", c.tertiaryContainer, c.onTertiaryContainer, Modifier.weight(1f))
+        }
+        Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+            Swatch("lowest", c.surfaceContainerLowest, c.onSurfaceVariant, Modifier.weight(1f), outlined = true)
+            Swatch("low", c.surfaceContainerLow, c.onSurfaceVariant, Modifier.weight(1f), outlined = true)
+            Swatch("container", c.surfaceContainer, c.onSurfaceVariant, Modifier.weight(1f), outlined = true)
+            Swatch("high", c.surfaceContainerHigh, c.onSurfaceVariant, Modifier.weight(1f), outlined = true)
+            Swatch("highest", c.surfaceContainerHighest, c.onSurfaceVariant, Modifier.weight(1f), outlined = true)
+            Swatch("outline", c.outline, c.surface, Modifier.weight(1f))
         }
     }
 }
 
 @Composable
+private fun Swatch(role: String, color: Color, onColor: Color, modifier: Modifier, outlined: Boolean = false) {
+    val shape = MaterialTheme.shapes.small
+    // Labels only when they fit: role and hex on wide swatches, hex alone on medium ones, none on narrow.
+    BoxWithConstraints(
+        modifier
+            .height(44.dp)
+            .clip(shape)
+            .background(color)
+            .then(if (outlined) Modifier.border(1.dp, MaterialTheme.colorScheme.outlineVariant, shape) else Modifier)
+            .padding(horizontal = 6.dp, vertical = 5.dp),
+    ) {
+        val style = MaterialTheme.typography.labelSmall
+        if (maxWidth >= 76.dp) {
+            Text(role, style = style, color = onColor, maxLines = 1, softWrap = false, overflow = TextOverflow.Clip, modifier = Modifier.align(Alignment.TopStart))
+        }
+        if (maxWidth >= 52.dp) {
+            Text(color.hex(), style = style, color = onColor.copy(alpha = 0.85f), maxLines = 1, softWrap = false, overflow = TextOverflow.Clip, modifier = Modifier.align(Alignment.BottomStart))
+        }
+    }
+}
+
+private fun Color.hex(): String = (toArgb() and 0xFFFFFF).toString(16).padStart(6, '0').uppercase()
+
+@Composable
 private fun ShapeScale() {
     val s = MaterialTheme.shapes
-    Row(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.Bottom) {
+    Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.Bottom) {
         listOf(s.extraSmall, s.small, s.medium, s.large, s.extraLarge).forEach { shape ->
             Box(
                 Modifier
-                    .size(26.dp)
+                    .size(34.dp)
                     .clip(shape)
                     .background(MaterialTheme.colorScheme.primaryContainer)
-                    .border(1.5.dp, MaterialTheme.colorScheme.primary, shape),
+                    .border(1.5.dp, MaterialTheme.colorScheme.primary, shape)
             )
         }
     }
@@ -146,11 +187,28 @@ private fun ShapeScale() {
 @Composable
 private fun TypeRamp() {
     val t = MaterialTheme.typography
-    Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.Bottom) {
+    Row(horizontalArrangement = Arrangement.spacedBy(10.dp), verticalAlignment = Alignment.Bottom) {
+        Text("Aa", style = t.displaySmall, color = MaterialTheme.colorScheme.onSurface, softWrap = false)
         Text("Aa", style = t.headlineSmall, color = MaterialTheme.colorScheme.onSurface, softWrap = false)
         Text("Aa", style = t.titleMedium, color = MaterialTheme.colorScheme.onSurface, softWrap = false)
         Text("Aa", style = t.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant, softWrap = false)
         Text("Aa", style = t.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, softWrap = false)
+    }
+}
+
+@Composable
+private fun Controls(wave: Float, onWave: (Float) -> Unit) {
+    var on by remember { mutableStateOf(true) }
+    var checked by remember { mutableStateOf(true) }
+    val progress by animateFloatAsState(wave, spring(stiffness = Spring.StiffnessLow), label = "progress")
+    Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+            Switch(checked = on, onCheckedChange = { on = it })
+            Checkbox(checked = checked, onCheckedChange = { checked = it })
+            Spacer(Modifier.width(4.dp))
+            LinearProgressIndicator(progress = { progress }, modifier = Modifier.weight(1f))
+        }
+        Slider(value = wave, onValueChange = onWave, enabled = on)
     }
 }
 
