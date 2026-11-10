@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Place
@@ -64,7 +65,7 @@ fun HomeScreen(widthClass: WidthClass, onEmail: () -> Unit, onWork: () -> Unit) 
         Hero(widthClass, onEmail, onWork)
         Reveal { DesignSystemCard(widthClass) }
         About(widthClass)
-        Toolkit()
+        Toolkit(widthClass)
     }
 }
 
@@ -208,19 +209,27 @@ private fun FactCard(fact: Fact) {
 }
 
 @Composable
-private fun Toolkit() {
-    Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+private fun Toolkit(widthClass: WidthClass) {
+    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Reveal { SectionHeader("Toolkit", "What I build with") }
         toolkit.forEachIndexed { groupIndex, group ->
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Reveal(delayMillis = groupIndex * 60) {
-                    Text(group.title, style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                }
-                FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    group.skills.forEachIndexed { i, skill ->
-                        Reveal(pop = true, delayMillis = groupIndex * 60 + i * 35) {
-                            SuggestionChip(onClick = {}, label = { Text(skill) }, modifier = Modifier.hoverLift(lift = 1.dp))
+            Reveal(delayMillis = groupIndex * 50) {
+                val chips: @Composable () -> Unit = {
+                    FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                        group.skills.forEach { skill ->
+                            SuggestionChip(onClick = {}, label = { Text(skill, style = MaterialTheme.typography.labelMedium) }, modifier = Modifier.hoverLift(lift = 1.dp))
                         }
+                    }
+                }
+                if (widthClass == WidthClass.Compact) {
+                    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                        Text(group.title, style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        chips()
+                    }
+                } else {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(group.title, style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.width(132.dp))
+                        chips()
                     }
                 }
             }
