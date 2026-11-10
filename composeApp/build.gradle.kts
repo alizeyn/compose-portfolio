@@ -21,6 +21,7 @@ kotlin {
     compilerOptions {
         optIn.addAll(
             "androidx.compose.material3.ExperimentalMaterial3Api",
+            "androidx.compose.material3.ExperimentalMaterial3ExpressiveApi",
             "androidx.compose.ui.ExperimentalComposeUiApi",
             "androidx.compose.foundation.layout.ExperimentalLayoutApi",
             "org.jetbrains.compose.resources.ExperimentalResourceApi",

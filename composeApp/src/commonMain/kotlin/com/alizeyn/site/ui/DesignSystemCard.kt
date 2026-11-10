@@ -15,6 +15,8 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -23,6 +25,10 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.MaterialShapes
+import androidx.compose.material3.VerticalDivider
+import androidx.compose.material3.toShape
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
@@ -74,17 +80,16 @@ fun DesignSystemCard(widthClass: WidthClass) {
             Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
                 Eyebrow()
                 Palette()
+                ShapeScale()
+                TypeRamp()
+                HorizontalDivider()
                 Row(horizontalArrangement = Arrangement.spacedBy(16.dp), verticalAlignment = Alignment.CenterVertically) {
-                    Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(14.dp)) {
-                        ShapeScale()
-                        TypeRamp()
-                    }
-                    Bugdroid(wave = wave, size = 88.dp)
+                    Bugdroid(wave = wave, size = 80.dp)
+                    Controls(wave = wave, onWave = { wave = it })
                 }
-                Controls(wave = wave, onWave = { wave = it })
             }
         } else {
-            Row(Modifier.padding(20.dp), horizontalArrangement = Arrangement.spacedBy(28.dp)) {
+            Row(Modifier.padding(20.dp).height(IntrinsicSize.Min), horizontalArrangement = Arrangement.spacedBy(24.dp)) {
                 Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(14.dp)) {
                     Eyebrow()
                     Palette()
@@ -98,9 +103,10 @@ fun DesignSystemCard(widthClass: WidthClass) {
                         TypeRamp()
                     }
                 }
+                VerticalDivider(Modifier.fillMaxHeight())
                 Column(
-                    Modifier.width(if (widthClass == WidthClass.Expanded) 240.dp else 200.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                    Modifier.width(if (widthClass == WidthClass.Expanded) 220.dp else 180.dp).fillMaxHeight(),
+                    verticalArrangement = Arrangement.Center,
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
                     Bugdroid(wave = wave, size = 104.dp)
@@ -163,17 +169,19 @@ private fun Swatch(role: String, color: Color, onColor: Color, modifier: Modifie
 
 private fun Color.hex(): String = (toArgb() and 0xFFFFFF).toString(16).padStart(6, '0').uppercase()
 
+/** Six of the Material 3 Expressive shapes, each clipped from the same primary-container tile. */
 @Composable
 private fun ShapeScale() {
-    val s = MaterialTheme.shapes
+    val polygons = listOf(MaterialShapes.Square, MaterialShapes.Slanted, MaterialShapes.Pill, MaterialShapes.Cookie9Sided, MaterialShapes.Clover8Leaf, MaterialShapes.Sunny)
+        .map { it.toShape() }
     Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.Bottom) {
-        listOf(s.extraSmall, s.small, s.medium, s.large, s.extraLarge).forEach { shape ->
+        polygons.forEach { shape ->
             Box(
                 Modifier
                     .size(34.dp)
                     .clip(shape)
                     .background(MaterialTheme.colorScheme.primaryContainer)
-                    .border(1.5.dp, MaterialTheme.colorScheme.primary, shape)
+                    .border(1.5.dp, MaterialTheme.colorScheme.primary, shape),
             )
         }
     }

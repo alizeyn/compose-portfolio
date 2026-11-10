@@ -4,7 +4,9 @@ import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ColorScheme
+import androidx.compose.material3.MaterialExpressiveTheme
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MotionScheme
 import androidx.compose.material3.Shapes
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
@@ -21,8 +23,10 @@ private val AppShapes = Shapes(
 
 @Composable
 fun SiteTheme(darkTheme: Boolean, content: @Composable () -> Unit) {
-    MaterialTheme(
+    // Material 3 Expressive: spring-based motion for every component transition.
+    MaterialExpressiveTheme(
         colorScheme = (if (darkTheme) DarkColors else LightColors).animated(),
+        motionScheme = MotionScheme.expressive(),
         shapes = AppShapes,
         typography = SiteTypography,
         content = content,

@@ -121,7 +121,7 @@ private fun AppCard(app: App, onOpen: () -> Unit) {
                 Text(app.company, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.primary)
             }
             Text(app.blurb, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            FilledTonalButton(onClick = onOpen, contentPadding = ButtonDefaults.ButtonWithIconContentPadding) {
+            FilledTonalButton(onClick = onOpen, shapes = ButtonDefaults.shapes(), contentPadding = ButtonDefaults.ButtonWithIconContentPadding) {
                 Text("Play Store")
                 Spacer(Modifier.size(ButtonDefaults.IconSpacing))
                 Icon(painterResource(Res.drawable.ic_open_in_new), contentDescription = "opens in a new tab", modifier = Modifier.size(ButtonDefaults.IconSize))
@@ -173,7 +173,7 @@ private fun RoleCard(role: Role, modifier: Modifier = Modifier) {
                     )
                 }
                 Column(Modifier.weight(1f)) {
-                    Text(role.company, style = MaterialTheme.typography.titleLarge)
+                    Text(role.company, style = MaterialTheme.typography.titleLargeEmphasized)
                     Text(
                         "${role.title} · ${role.period}",
                         style = MaterialTheme.typography.bodyMedium,

@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -24,13 +25,16 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialShapes
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.toShape
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.SuggestionChip
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -70,9 +74,9 @@ private val facts = listOf(
 fun HomeScreen(widthClass: WidthClass, onEmail: () -> Unit, onWork: () -> Unit) {
     Page(widthClass) {
         Hero(widthClass, onEmail, onWork)
-        Reveal { DesignSystemCard(widthClass) }
         About(widthClass)
         Toolkit(widthClass)
+        Reveal { DesignSystemCard(widthClass) }
     }
 }
 
@@ -135,7 +139,8 @@ private fun HeroChips(onWork: () -> Unit, stacked: Boolean) {
  */
 @Composable
 private fun Portrait(size: Dp) {
-    val shape = MaterialTheme.shapes.extraLarge
+    // One of the Material 3 Expressive shapes: a 12-sided cookie, shallow scallops.
+    val shape = MaterialShapes.Cookie12Sided.toShape()
     val dark = MaterialTheme.colorScheme.background.luminance() < 0.5f
     val shadow by animateColorAsState(if (dark) Color(0xFF071009) else Color(0xFF0B3D27), tween(450), label = "shadow")
     val highlight by animateColorAsState(if (dark) Color(0xFFBFECD8) else Color(0xFFF1FDF0), tween(450), label = "highlight")
@@ -168,8 +173,8 @@ private fun HeroCopy(modifier: Modifier, onEmail: () -> Unit, onWork: () -> Unit
         if (withChips) Reveal { HeroChips(onWork, stacked = false) }
         Reveal(delayMillis = 90) {
             Column {
-                Text(Profile.firstName, style = MaterialTheme.typography.displayLarge, color = MaterialTheme.colorScheme.onBackground)
-                Text(Profile.lastName, style = MaterialTheme.typography.displayLarge.copy(brush = shimmerBrush()))
+                Text(Profile.firstName, style = MaterialTheme.typography.displayLargeEmphasized, color = MaterialTheme.colorScheme.onBackground)
+                Text(Profile.lastName, style = MaterialTheme.typography.displayLargeEmphasized.copy(brush = shimmerBrush()))
             }
         }
         Reveal(delayMillis = 180) {
@@ -182,20 +187,34 @@ private fun HeroCopy(modifier: Modifier, onEmail: () -> Unit, onWork: () -> Unit
         Spacer(Modifier.height(4.dp))
         Reveal(delayMillis = 270) {
         FlowRow(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            Button(onClick = onEmail, contentPadding = ButtonDefaults.ButtonWithIconContentPadding) {
-                Icon(Icons.Filled.Email, contentDescription = null, modifier = Modifier.size(ButtonDefaults.IconSize))
-                Spacer(Modifier.size(ButtonDefaults.IconSpacing))
-                Text("Email me")
+            // Medium expressive buttons: taller container, morphing shape on press.
+            val height = ButtonDefaults.MediumContainerHeight
+            Button(
+                onClick = onEmail,
+                shapes = ButtonDefaults.shapes(),
+                modifier = Modifier.heightIn(height),
+                contentPadding = ButtonDefaults.contentPaddingFor(height),
+            ) {
+                Icon(Icons.Filled.Email, contentDescription = null, modifier = Modifier.size(ButtonDefaults.iconSizeFor(height)))
+                Spacer(Modifier.size(ButtonDefaults.iconSpacingFor(height)))
+                Text("Email me", style = ButtonDefaults.textStyleFor(height))
             }
             FilledTonalButton(
                 onClick = { uriHandler.openUri(Profile.linkedin) },
-                contentPadding = ButtonDefaults.ButtonWithIconContentPadding,
+                shapes = ButtonDefaults.shapes(),
+                modifier = Modifier.heightIn(height),
+                contentPadding = ButtonDefaults.contentPaddingFor(height),
             ) {
-                Text("LinkedIn")
-                Spacer(Modifier.size(ButtonDefaults.IconSpacing))
-                Icon(painterResource(Res.drawable.ic_open_in_new), contentDescription = "opens in a new tab", modifier = Modifier.size(ButtonDefaults.IconSize))
+                Text("LinkedIn", style = ButtonDefaults.textStyleFor(height))
+                Spacer(Modifier.size(ButtonDefaults.iconSpacingFor(height)))
+                Icon(painterResource(Res.drawable.ic_open_in_new), contentDescription = "opens in a new tab", modifier = Modifier.size(ButtonDefaults.iconSizeFor(height)))
             }
-            OutlinedButton(onClick = onWork) { Text("See my work") }
+            OutlinedButton(
+                onClick = onWork,
+                shapes = ButtonDefaults.shapes(),
+                modifier = Modifier.heightIn(height),
+                contentPadding = ButtonDefaults.contentPaddingFor(height),
+            ) { Text("See my work", style = ButtonDefaults.textStyleFor(height)) }
         }
         }
     }

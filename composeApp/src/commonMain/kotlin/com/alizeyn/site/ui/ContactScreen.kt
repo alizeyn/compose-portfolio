@@ -10,7 +10,7 @@ import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Place
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ExtendedFloatingActionButton
+import androidx.compose.material3.MediumExtendedFloatingActionButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
@@ -41,7 +41,7 @@ fun ContactScreen(widthClass: WidthClass, onEmail: () -> Unit) {
             )
         }
         Reveal(pop = true, delayMillis = 160) {
-            ExtendedFloatingActionButton(
+            MediumExtendedFloatingActionButton(
                 onClick = onEmail,
                 icon = { Icon(Icons.Filled.Email, contentDescription = null) },
                 text = { Text("Email me") },

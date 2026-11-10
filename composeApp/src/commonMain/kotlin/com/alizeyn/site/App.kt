@@ -29,12 +29,13 @@ import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.NavigationRail
-import androidx.compose.material3.NavigationRailItem
+import androidx.compose.material3.FilledTonalIconToggleButton
+import androidx.compose.material3.IconButtonDefaults
+import androidx.compose.material3.ShortNavigationBar
+import androidx.compose.material3.ShortNavigationBarItem
+import androidx.compose.material3.WideNavigationRail
+import androidx.compose.material3.WideNavigationRailItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -159,7 +160,7 @@ fun App(
 @Composable
 private fun ThemeToggle(dark: Boolean, onToggle: () -> Unit) {
     val rotation by animateFloatAsState(if (dark) 180f else 0f, spring(stiffness = 200f, dampingRatio = 0.7f), label = "toggleSpin")
-    IconButton(onClick = onToggle) {
+    FilledTonalIconToggleButton(checked = dark, onCheckedChange = { onToggle() }, shapes = IconButtonDefaults.toggleableShapes()) {
         AnimatedContent(
             targetState = dark,
             transitionSpec = { (fadeIn(tween(250)) + scaleIn(initialScale = 0.6f)) togetherWith (fadeOut(tween(150)) + scaleOut(targetScale = 0.6f)) },
@@ -195,10 +196,10 @@ private fun CompactLayout(
             )
         },
         bottomBar = {
-            NavigationBar {
+            ShortNavigationBar {
                 Destination.entries.forEach { d ->
                     val selected = d == destination
-                    NavigationBarItem(
+                    ShortNavigationBarItem(
                         selected = selected,
                         onClick = { onDestination(d) },
                         icon = { DestinationIcon(d, selected) },
@@ -224,32 +225,31 @@ private fun RailLayout(
     onEmail: () -> Unit,
 ) {
     Row(Modifier.fillMaxSize()) {
-        NavigationRail(
-            containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
-            header = {
-                Spacer(Modifier.height(8.dp))
-                FloatingActionButton(
-                    onClick = onEmail,
-                    containerColor = MaterialTheme.colorScheme.tertiaryContainer,
-                    contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
-                ) {
-                    Icon(Icons.Outlined.Email, contentDescription = "Send me an email")
+        Box {
+            WideNavigationRail(
+                header = {
+                    FloatingActionButton(
+                        onClick = onEmail,
+                        containerColor = MaterialTheme.colorScheme.tertiaryContainer,
+                        contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
+                        modifier = Modifier.padding(start = 20.dp, top = 8.dp),
+                    ) {
+                        Icon(Icons.Outlined.Email, contentDescription = "Send me an email")
+                    }
+                },
+            ) {
+                Destination.entries.forEach { d ->
+                    val selected = d == destination
+                    WideNavigationRailItem(
+                        selected = selected,
+                        onClick = { onDestination(d) },
+                        icon = { DestinationIcon(d, selected) },
+                        label = { Text(d.label) },
+                        railExpanded = false,
+                    )
                 }
-            },
-        ) {
-            Spacer(Modifier.weight(1f))
-            Destination.entries.forEach { d ->
-                val selected = d == destination
-                NavigationRailItem(
-                    selected = selected,
-                    onClick = { onDestination(d) },
-                    icon = { DestinationIcon(d, selected) },
-                    label = { Text(d.label) },
-                )
             }
-            Spacer(Modifier.weight(1f))
-            themeToggle()
-            Spacer(Modifier.height(16.dp))
+            Box(Modifier.align(Alignment.BottomCenter).padding(bottom = 16.dp)) { themeToggle() }
         }
         Box(Modifier.weight(1f).fillMaxSize()) {
             Content(destination, widthClass, onDestination, onEmail)
