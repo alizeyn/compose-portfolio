@@ -89,7 +89,7 @@ private fun Portrait(size: Dp) {
     Glow(Modifier.size(size).hoverLift(scale = 1.03f, lift = 4.dp)) {
         Image(
             painter = painterResource(Res.drawable.hero_portrait),
-            contentDescription = "Portrait of Ali in a film shop",
+            contentDescription = "Portrait of Ali, smiling, in front of a fern print",
             contentScale = ContentScale.Crop,
             modifier = Modifier.size(size).clip(MaterialTheme.shapes.extraLarge),
         )
