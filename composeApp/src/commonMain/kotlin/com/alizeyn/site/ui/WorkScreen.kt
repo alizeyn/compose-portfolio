@@ -14,6 +14,9 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.MaterialShapes
+import androidx.compose.material3.toShape
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.layout.width
@@ -33,6 +36,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.Dp
@@ -58,7 +62,7 @@ fun WorkScreen(widthClass: WidthClass) {
                     Row(Modifier.height(IntrinsicSize.Max), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                         pair.forEachIndexed { i, role ->
                             Reveal(Modifier.weight(1f).fillMaxHeight(), delayMillis = (rowIndex * 2 + i) * 70) {
-                                RoleCard(role, Modifier.fillMaxHeight())
+                                RoleCard(role, rowIndex * 2 + i, Modifier.fillMaxHeight())
                             }
                         }
                     }
@@ -66,7 +70,7 @@ fun WorkScreen(widthClass: WidthClass) {
             }
         } else {
             Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                roles.forEachIndexed { i, role -> Reveal(delayMillis = i * 70) { RoleCard(role) } }
+                roles.forEachIndexed { i, role -> Reveal(delayMillis = i * 70) { RoleCard(role, i) } }
             }
         }
         Text(
@@ -144,74 +148,100 @@ private fun AppRow(app: App, onOpen: () -> Unit) {
         }
     }
 }
+/**
+ * In the style of the cards on m3.material.io: a coloured header band carrying the logo, company
+ * and title, with an expressive shape peeking in from the edge, and the body text below.
+ * The header opens the company's LinkedIn page.
+ */
 @Composable
-private fun RoleCard(role: Role, modifier: Modifier = Modifier) {
+private fun RoleCard(role: Role, index: Int, modifier: Modifier = Modifier) {
     val uriHandler = LocalUriHandler.current
-    ElevatedCard(modifier.fillMaxWidth().hoverLift()) {
-        Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            // Logo, company and title open the company's LinkedIn page.
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(14.dp),
-                modifier = Modifier
-                    .clip(MaterialTheme.shapes.medium)
-                    .clickable { uriHandler.openUri(role.linkedin) }
-                    .padding(4.dp),
+    val scheme = MaterialTheme.colorScheme
+    val (header, onHeader) = listOf(
+        scheme.primaryContainer to scheme.onPrimaryContainer,
+        scheme.tertiaryContainer to scheme.onTertiaryContainer,
+        scheme.secondaryContainer to scheme.onSecondaryContainer,
+        scheme.surfaceContainerHighest to scheme.onSurface,
+    )[index % 4]
+    val decoration = listOf(MaterialShapes.Cookie9Sided, MaterialShapes.Sunny, MaterialShapes.Clover8Leaf, MaterialShapes.Pill)[index % 4].toShape()
+
+    ElevatedCard(modifier.fillMaxWidth().hoverLift(), shape = MaterialTheme.shapes.extraLarge) {
+        Column {
+            Box(
+                Modifier
+                    .fillMaxWidth()
+                    .height(116.dp)
+                    .background(header)
+                    .clipToBounds()
+                    .clickable { uriHandler.openUri(role.linkedin) },
+                contentAlignment = Alignment.CenterStart,
             ) {
                 Box(
                     Modifier
-                        .size(52.dp)
-                        .clip(MaterialTheme.shapes.medium)
-                        .background(MaterialTheme.colorScheme.surfaceContainerHighest),
-                    contentAlignment = Alignment.Center,
+                        .align(Alignment.CenterEnd)
+                        .offset(x = 40.dp, y = 30.dp)
+                        .size(150.dp)
+                        .clip(decoration)
+                        .background(onHeader.copy(alpha = 0.10f)),
+                )
+                Row(
+                    Modifier.padding(20.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(16.dp),
                 ) {
-                    Image(
-                        painter = painterResource(role.logo),
-                        contentDescription = "${role.company} logo",
-                        contentScale = ContentScale.Fit,
-                        modifier = Modifier.size(40.dp).clip(MaterialTheme.shapes.small),
+                    Box(
+                        Modifier
+                            .size(64.dp)
+                            .clip(MaterialTheme.shapes.large)
+                            .background(scheme.surfaceContainerLowest),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Image(
+                            painter = painterResource(role.logo),
+                            contentDescription = "${role.company} logo",
+                            contentScale = ContentScale.Fit,
+                            modifier = Modifier.size(48.dp).clip(MaterialTheme.shapes.small),
+                        )
+                    }
+                    Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                        Text(role.company, style = MaterialTheme.typography.titleLargeEmphasized, color = onHeader)
+                        Text(role.title, style = MaterialTheme.typography.bodyMedium, color = onHeader.copy(alpha = 0.85f))
+                        Text(role.period, style = MaterialTheme.typography.labelMedium, color = onHeader.copy(alpha = 0.7f))
+                    }
+                    Icon(
+                        painterResource(Res.drawable.ic_open_in_new),
+                        contentDescription = "${role.company} on LinkedIn",
+                        tint = onHeader.copy(alpha = 0.8f),
+                        modifier = Modifier.size(18.dp),
                     )
                 }
-                Column(Modifier.weight(1f)) {
-                    Text(role.company, style = MaterialTheme.typography.titleLargeEmphasized)
-                    Text(
-                        "${role.title} · ${role.period}",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+            }
+            Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    AssistChip(
+                        onClick = {},
+                        label = { Text(role.arrangement) },
+                        leadingIcon = { Icon(Icons.Filled.DateRange, contentDescription = null, modifier = Modifier.size(AssistChipDefaults.IconSize)) },
+                    )
+                    AssistChip(
+                        onClick = {},
+                        label = { Text(role.place) },
+                        leadingIcon = { Icon(Icons.Filled.Place, contentDescription = null, modifier = Modifier.size(AssistChipDefaults.IconSize)) },
                     )
                 }
-                Icon(
-                    painterResource(Res.drawable.ic_open_in_new),
-                    contentDescription = "${role.company} on LinkedIn",
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.size(18.dp),
-                )
-            }
-            FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                AssistChip(
-                    onClick = {},
-                    label = { Text(role.arrangement) },
-                    leadingIcon = { Icon(Icons.Filled.DateRange, contentDescription = null, modifier = Modifier.size(AssistChipDefaults.IconSize)) },
-                )
-                AssistChip(
-                    onClick = {},
-                    label = { Text(role.place) },
-                    leadingIcon = { Icon(Icons.Filled.Place, contentDescription = null, modifier = Modifier.size(AssistChipDefaults.IconSize)) },
-                )
-            }
-            Text(role.summary, style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                role.highlights.forEach { line ->
-                    Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                        Text("•", style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.primary, modifier = Modifier.width(10.dp))
-                        Text(line, style = MaterialTheme.typography.bodyLarge)
+                Text(role.summary, style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                    role.highlights.forEach { line ->
+                        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                            Text("•", style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.primary, modifier = Modifier.width(10.dp))
+                            Text(line, style = MaterialTheme.typography.bodyLarge)
+                        }
                     }
                 }
-            }
-            FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                role.stack.forEach { SuggestionChip(onClick = {}, label = { Text(it) }, modifier = Modifier.hoverLift(lift = 1.dp)) }
+                FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    role.stack.forEach { SuggestionChip(onClick = {}, label = { Text(it) }, modifier = Modifier.hoverLift(lift = 1.dp)) }
+                }
             }
         }
     }
 }
-
