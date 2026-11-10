@@ -72,14 +72,52 @@ fun HomeScreen(widthClass: WidthClass, onEmail: () -> Unit, onWork: () -> Unit) 
 @Composable
 private fun Hero(widthClass: WidthClass, onEmail: () -> Unit, onWork: () -> Unit) {
     when (widthClass) {
-        WidthClass.Compact -> Column(verticalArrangement = Arrangement.spacedBy(24.dp)) {
-            Reveal(pop = true) { Portrait(size = 160.dp) }
-            HeroCopy(Modifier.fillMaxWidth(), onEmail, onWork)
+        // Phones: portrait and the three chips share one row, then the copy below.
+        WidthClass.Compact -> Column(verticalArrangement = Arrangement.spacedBy(20.dp)) {
+            Row(horizontalArrangement = Arrangement.spacedBy(16.dp), verticalAlignment = Alignment.CenterVertically) {
+                Reveal(pop = true) { Portrait(size = 128.dp) }
+                Reveal(delayMillis = 60) { HeroChips(onWork, stacked = true) }
+            }
+            HeroCopy(Modifier.fillMaxWidth(), onEmail, onWork, withChips = false)
         }
         else -> Row(horizontalArrangement = Arrangement.spacedBy(32.dp), verticalAlignment = Alignment.CenterVertically) {
-            HeroCopy(Modifier.weight(1f), onEmail, onWork)
+            HeroCopy(Modifier.weight(1f), onEmail, onWork, withChips = true)
             Reveal(pop = true, delayMillis = 150) { Portrait(size = if (widthClass == WidthClass.Expanded) 260.dp else 200.dp) }
         }
+    }
+}
+
+/** Role, focus and location chips, wrapping in a row or stacked in a column. */
+@Composable
+private fun HeroChips(onWork: () -> Unit, stacked: Boolean) {
+    val uriHandler = LocalUriHandler.current
+    val chips: @Composable () -> Unit = {
+        AssistChip(
+            onClick = onWork,
+            label = { Text(Profile.role) },
+            leadingIcon = {
+                Icon(painterResource(Res.drawable.ic_work), contentDescription = null, modifier = Modifier.size(AssistChipDefaults.IconSize))
+            },
+        )
+        AssistChip(
+            onClick = onWork,
+            label = { Text(Profile.focus) },
+            leadingIcon = {
+                Icon(painterResource(Res.drawable.ic_palette), contentDescription = null, modifier = Modifier.size(AssistChipDefaults.IconSize))
+            },
+        )
+        AssistChip(
+            onClick = { uriHandler.openUri("https://maps.google.com/?q=Vienna,+Austria") },
+            label = { Text(Profile.location) },
+            leadingIcon = {
+                Icon(Icons.Filled.Place, contentDescription = null, modifier = Modifier.size(AssistChipDefaults.IconSize))
+            },
+        )
+    }
+    if (stacked) {
+        Column(verticalArrangement = Arrangement.spacedBy(4.dp), horizontalAlignment = Alignment.Start) { chips() }
+    } else {
+        FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) { chips() }
     }
 }
 
@@ -100,42 +138,10 @@ private fun Portrait(size: Dp) {
 }
 
 @Composable
-private fun HeroCopy(modifier: Modifier, onEmail: () -> Unit, onWork: () -> Unit) {
+private fun HeroCopy(modifier: Modifier, onEmail: () -> Unit, onWork: () -> Unit, withChips: Boolean) {
     val uriHandler = LocalUriHandler.current
     Column(modifier, verticalArrangement = Arrangement.spacedBy(16.dp)) {
-        Reveal {
-        FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            AssistChip(
-                onClick = onWork,
-                label = { Text(Profile.role) },
-                leadingIcon = {
-                    Icon(
-                        painterResource(Res.drawable.ic_work),
-                        contentDescription = null,
-                        modifier = Modifier.size(AssistChipDefaults.IconSize),
-                    )
-                },
-            )
-            AssistChip(
-                onClick = onWork,
-                label = { Text(Profile.focus) },
-                leadingIcon = {
-                    Icon(
-                        painterResource(Res.drawable.ic_palette),
-                        contentDescription = null,
-                        modifier = Modifier.size(AssistChipDefaults.IconSize),
-                    )
-                },
-            )
-            AssistChip(
-                onClick = { uriHandler.openUri("https://maps.google.com/?q=Vienna,+Austria") },
-                label = { Text(Profile.location) },
-                leadingIcon = {
-                    Icon(Icons.Filled.Place, contentDescription = null, modifier = Modifier.size(AssistChipDefaults.IconSize))
-                },
-            )
-        }
-        }
+        if (withChips) Reveal { HeroChips(onWork, stacked = false) }
         Reveal(delayMillis = 90) {
             Column {
                 Text(Profile.firstName, style = MaterialTheme.typography.displayLarge, color = MaterialTheme.colorScheme.onBackground)
