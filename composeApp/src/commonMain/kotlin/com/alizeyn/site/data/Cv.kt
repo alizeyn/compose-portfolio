@@ -153,42 +153,6 @@ val toolkit: List<SkillGroup> = listOf(
     SkillGroup("Also", listOf("Java", "RxJava", "SDK docs & changelogs", "Git", "Agile")),
 )
 
-data class Faq(val question: String, val answer: List<String>)
-
-val faqs: List<Faq> = listOf(
-    Faq(
-        question = "Engineer or designer?",
-        answer = listOf(
-            "Both, and that's the point. Ten years of Android engineering, with product design as the side that kept growing.",
-            "In a design-system team that isn't a split, it's the job: translating UX intent into component APIs and back.",
-        ),
-    ),
-    Faq(
-        question = "What's your Compose story?",
-        answer = listOf(
-            "Introduced it for new projects at shopreme, then used it daily at Ohana, including a full Jetpack Navigation migration and shared component styles across modules.",
-            "This site is Compose too, drawn with Material 3 and compiled to WebAssembly.",
-        ),
-    ),
-    Faq(
-        question = "RTL, really?",
-        answer = listOf(
-            "Four years on Neshan, a Persian-language app for 10 million people. Right-to-left layouts, Arabic-script typography and small screens were the daily normal.",
-        ),
-    ),
-    Faq(
-        question = "Language stuff?",
-        answer = listOf("My German is around B1.", "English is fluent,", "and my mother tongue is Persian."),
-    ),
-    Faq(
-        question = "What did you study again?",
-        answer = listOf("B.Sc. in Software Engineering, Ferdowsi University of Mashhad. Design and visual art never stopped being a side study."),
-    ),
-    Faq(
-        question = "Do you have, like hobbies?",
-        answer = listOf("Generative art, producing music, photography, hiking. Huge fan of tea, and coffee when the tea runs out."),
-    ),
-)
 
 /** An app on the Play Store that I shipped or built the SDK for. */
 data class App(

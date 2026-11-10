@@ -55,13 +55,11 @@ import androidx.compose.ui.unit.dp
 import com.alizeyn.site.data.Profile
 import com.alizeyn.site.resources.Res
 import com.alizeyn.site.resources.ic_dark_mode
-import com.alizeyn.site.resources.ic_help
 import com.alizeyn.site.resources.ic_light_mode
 import com.alizeyn.site.resources.ic_science
 import com.alizeyn.site.resources.ic_work
 import com.alizeyn.site.theme.SiteTheme
 import com.alizeyn.site.ui.ContactScreen
-import com.alizeyn.site.ui.FaqScreen
 import com.alizeyn.site.ui.HomeScreen
 import com.alizeyn.site.ui.WorkScreen
 import com.alizeyn.site.ui.lab.LabScreen
@@ -80,7 +78,6 @@ enum class Destination(val label: String, val route: String) {
     Home("Home", "home"),
     Work("Work", "work"),
     Lab("Lab", "lab"),
-    Faq("FAQ", "faq"),
     Contact("Contact", "contact");
 
     companion object {
@@ -95,7 +92,6 @@ private fun DestinationIcon(destination: Destination, selected: Boolean) {
         Destination.Home -> Icon(if (selected) Icons.Filled.Home else Icons.Outlined.Home, contentDescription = null)
         Destination.Work -> Icon(painterResource(Res.drawable.ic_work), contentDescription = null)
         Destination.Lab -> Icon(painterResource(Res.drawable.ic_science), contentDescription = null)
-        Destination.Faq -> Icon(painterResource(Res.drawable.ic_help), contentDescription = null)
         Destination.Contact -> Icon(if (selected) Icons.Filled.Email else Icons.Outlined.Email, contentDescription = null)
     }
 }
@@ -104,6 +100,7 @@ private fun DestinationIcon(destination: Destination, selected: Boolean) {
 fun App(
     initialDestination: Destination = Destination.Home,
     onDestinationChanged: (Destination) -> Unit = {},
+    onEmail: (() -> Unit)? = null,
 ) {
     // Light is the default; the toggle flips it for the session.
     var dark by remember { mutableStateOf(false) }
@@ -112,7 +109,7 @@ fun App(
         var destination by remember { mutableStateOf(initialDestination) }
         LaunchedEffect(destination) { onDestinationChanged(destination) }
         val uriHandler = LocalUriHandler.current
-        val sendEmail = { uriHandler.openUri("mailto:${Profile.email}") }
+        val sendEmail = onEmail ?: { uriHandler.openUri("mailto:${Profile.email}") }
 
         Surface(Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
             BoxWithConstraints {
@@ -263,7 +260,6 @@ private fun Content(
                 Destination.Home -> HomeScreen(widthClass, onEmail = onEmail, onWork = { onDestination(Destination.Work) })
                 Destination.Work -> WorkScreen(widthClass)
                 Destination.Lab -> LabScreen(widthClass)
-                Destination.Faq -> FaqScreen(widthClass)
                 Destination.Contact -> ContactScreen(widthClass, onEmail = onEmail)
             }
         }
