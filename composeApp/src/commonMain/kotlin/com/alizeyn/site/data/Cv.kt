@@ -10,6 +10,7 @@ import com.alizeyn.site.resources.logo_foxyfitness
 import com.alizeyn.site.resources.logo_neshan
 import com.alizeyn.site.resources.logo_ohana
 import com.alizeyn.site.resources.logo_shopreme
+import androidx.compose.ui.graphics.Color
 import org.jetbrains.compose.resources.DrawableResource
 
 /** A run of text inside a paragraph. `accent` marks the highlighted phrases. */
@@ -57,6 +58,10 @@ data class Role(
     val arrangement: String,
     val place: String,
     val logo: DrawableResource,
+    /** Deep shade of the logo's main colour, used for the card header. */
+    val brand: Color,
+    /** Light tint of the same hue for text on [brand]. */
+    val brandInk: Color,
     /** The company page on LinkedIn. */
     val linkedin: String,
     val summary: String,
@@ -72,6 +77,8 @@ val roles: List<Role> = listOf(
         arrangement = "Hybrid",
         place = "Linz",
         logo = Res.drawable.logo_foxyfitness,
+        brand = Color(0xFF2A1708),
+        brandInk = Color(0xFFFFC27A),
         linkedin = "https://www.linkedin.com/company/foxyfitness/",
         summary = "Fitness start-up. A small team, so everyone wears several hats.",
         highlights = listOf(
@@ -88,6 +95,8 @@ val roles: List<Role> = listOf(
         arrangement = "Remote",
         place = "Linz",
         logo = Res.drawable.logo_ohana,
+        brand = Color(0xFF180F3D),
+        brandInk = Color(0xFFC9B8FF),
         linkedin = "https://www.linkedin.com/company/ohana-software-gmbh/",
         summary = "Parental-control app that helps families build healthy screen-time routines.",
         highlights = listOf(
@@ -106,6 +115,8 @@ val roles: List<Role> = listOf(
         arrangement = "On-site",
         place = "Graz",
         logo = Res.drawable.logo_shopreme,
+        brand = Color(0xFF1F1338),
+        brandInk = Color(0xFFD3C2FF),
         linkedin = "https://www.linkedin.com/company/shopreme-self-checkout/",
         summary = "Scan & Go SDK and self-checkout platform used by brands like Rewe, Auchan and ALDI.",
         highlights = listOf(
@@ -124,6 +135,8 @@ val roles: List<Role> = listOf(
         arrangement = "Hybrid",
         place = "Mashhad",
         logo = Res.drawable.logo_neshan,
+        brand = Color(0xFF07271F),
+        brandInk = Color(0xFF8CE6C9),
         linkedin = "https://www.linkedin.com/company/neshanmaps/",
         summary = "Maps and navigation used by 10 million people in Iran, localised down to the speed bumps.",
         highlights = listOf(

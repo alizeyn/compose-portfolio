@@ -147,7 +147,7 @@ private fun AppRow(app: App, onOpen: () -> Unit) {
 }
 /**
  * Role card after the m3.material.io news card: a flat surface-container-low card with 24dp
- * corners, a solid brand-green header carrying the company, role title and date line, then a
+ * corners, a solid header in a deep shade of the company logo carrying the company, role title and date line, then a
  * 24dp-padded body of description, highlights and stack. The header opens the company's
  * LinkedIn page.
  */
@@ -155,8 +155,8 @@ private fun AppRow(app: App, onOpen: () -> Unit) {
 private fun RoleCard(role: Role, index: Int, modifier: Modifier = Modifier) {
     val uriHandler = LocalUriHandler.current
     val corner = RoundedCornerShape(24.dp)
-    val field = MaterialTheme.colorScheme.primaryContainer
-    val ink = MaterialTheme.colorScheme.onPrimaryContainer
+    val field = role.brand
+    val ink = role.brandInk
 
     Card(
         modifier = modifier.fillMaxWidth().hoverLift(),
@@ -184,7 +184,7 @@ private fun RoleCard(role: Role, index: Int, modifier: Modifier = Modifier) {
                     }
                     Text(
                         role.company,
-                        fontSize = 22.sp, lineHeight = 28.sp, fontWeight = FontWeight.Medium,
+                        fontSize = 22.sp, lineHeight = 28.sp, fontWeight = FontWeight.Bold,
                         color = ink,
                     )
                 }
