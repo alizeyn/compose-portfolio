@@ -18,11 +18,6 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.foundation.layout.BoxWithConstraints
-import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -151,23 +146,17 @@ private fun AppRow(app: App, onOpen: () -> Unit) {
     }
 }
 /**
- * A faithful copy of the news cards on m3.material.io (measured from the live page): a flat
- * surface-container-low card with 24dp corners, a 2:1 banner framed by a 14 × 7 grid whose middle
- * window is left clear and carries the company set large, then a 24dp-padded stack of
- * date (16/24), title (24/32 medium) and description (16/24, on-surface-variant) with 8dp gaps.
- * The banner opens the company's LinkedIn page.
+ * Role card after the m3.material.io news card: a flat surface-container-low card with 24dp
+ * corners, a solid brand-green header carrying the company, role title and date line, then a
+ * 24dp-padded body of description, highlights and stack. The header opens the company's
+ * LinkedIn page.
  */
 @Composable
 private fun RoleCard(role: Role, index: Int, modifier: Modifier = Modifier) {
     val uriHandler = LocalUriHandler.current
-    // Field, grid line, title. The third set is the reference card's own purple.
-    val (field, line, ink) = listOf(
-        Triple(Color(0xFF0D2B1C), Color(0xFF3FBF7F), Color(0xFF5CFF9F)),
-        Triple(Color(0xFF0E2A2A), Color(0xFF4FA8A0), Color(0xFF8DD3C8)),
-        Triple(Color(0xFF2A0C35), Color(0xFFA46BD6), Color(0xFFED9EFF)),
-        Triple(Color(0xFF2A1B10), Color(0xFFC47A3C), Color(0xFFFFB874)),
-    )[index % 4]
     val corner = RoundedCornerShape(24.dp)
+    val field = MaterialTheme.colorScheme.primaryContainer
+    val ink = MaterialTheme.colorScheme.onPrimaryContainer
 
     Card(
         modifier = modifier.fillMaxWidth().hoverLift(),
@@ -176,51 +165,43 @@ private fun RoleCard(role: Role, index: Int, modifier: Modifier = Modifier) {
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
     ) {
         Column {
-            BoxWithConstraints(
+            Column(
                 Modifier
                     .fillMaxWidth()
-                    .aspectRatio(584f / 298f)
                     .clip(corner)
                     .background(field)
-                    .gridFrame(field, line)
-                    .clickable { uriHandler.openUri(role.linkedin) },
-                contentAlignment = Alignment.Center,
+                    .clickable { uriHandler.openUri(role.linkedin) }
+                    .padding(horizontal = 24.dp, vertical = 20.dp),
             ) {
-                val bannerWidth = maxWidth
-                val titleSize = (bannerWidth.value * 0.1f).sp
-                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(14.dp)) {
-                    Box(Modifier.size(bannerWidth * 0.075f).clip(MaterialTheme.shapes.small).background(Color.White), contentAlignment = Alignment.Center) {
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    Box(Modifier.size(36.dp).clip(MaterialTheme.shapes.small).background(Color.White), contentAlignment = Alignment.Center) {
                         Image(
                             painter = painterResource(role.logo),
                             contentDescription = "${role.company} logo",
                             contentScale = ContentScale.Fit,
-                            modifier = Modifier.size(bannerWidth * 0.056f).clip(MaterialTheme.shapes.extraSmall),
+                            modifier = Modifier.size(26.dp).clip(MaterialTheme.shapes.extraSmall),
                         )
                     }
                     Text(
                         role.company,
-                        fontSize = titleSize,
-                        lineHeight = titleSize,
-                        fontWeight = FontWeight.Medium,
-                        letterSpacing = (-0.5).sp,
+                        fontSize = 22.sp, lineHeight = 28.sp, fontWeight = FontWeight.Medium,
                         color = ink,
-                        softWrap = false,
                     )
                 }
-            }
-            Column(Modifier.padding(24.dp)) {
-                Text(
-                    "${role.period} · ${role.arrangement} · ${role.place}",
-                    fontSize = 16.sp, lineHeight = 24.sp, fontWeight = FontWeight.Normal,
-                    color = MaterialTheme.colorScheme.onSurface,
-                )
-                Spacer(Modifier.height(16.dp))
+                Spacer(Modifier.height(12.dp))
                 Text(
                     role.title,
-                    fontSize = 24.sp, lineHeight = 32.sp, fontWeight = FontWeight.Medium,
-                    color = MaterialTheme.colorScheme.onSurface,
+                    fontSize = 18.sp, lineHeight = 24.sp, fontWeight = FontWeight.Medium,
+                    color = ink,
                 )
-                Spacer(Modifier.height(8.dp))
+                Spacer(Modifier.height(2.dp))
+                Text(
+                    "${role.period} · ${role.arrangement} · ${role.place}",
+                    fontSize = 14.sp, lineHeight = 20.sp, fontWeight = FontWeight.Normal,
+                    color = ink.copy(alpha = 0.8f),
+                )
+            }
+            Column(Modifier.padding(24.dp)) {
                 Text(
                     role.summary,
                     fontSize = 16.sp, lineHeight = 24.sp, fontWeight = FontWeight.Normal,
@@ -242,19 +223,4 @@ private fun RoleCard(role: Role, index: Int, modifier: Modifier = Modifier) {
             }
         }
     }
-}
-
-/**
- * The reference banner's grid: 14 columns by 7 rows of square cells, vertical lines on the
- * half-cell, horizontal lines on the cell, and a clear window inset 1.5 cells horizontally and
- * one cell vertically. Measured from the "Compose First" illustration.
- */
-private fun Modifier.gridFrame(field: Color, line: Color): Modifier = drawBehind {
-    val cell = size.width / 14f
-    val stroke = 1.dp.toPx()
-    var x = cell / 2f
-    while (x < size.width) { drawLine(line, Offset(x, 0f), Offset(x, size.height), stroke); x += cell }
-    var y = cell
-    while (y < size.height) { drawLine(line, Offset(0f, y), Offset(size.width, y), stroke); y += cell }
-    drawRect(field, topLeft = Offset(cell * 1.5f, cell), size = Size(size.width - cell * 3f, size.height - cell * 2f))
 }
