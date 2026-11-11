@@ -14,6 +14,11 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Size
@@ -23,10 +28,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.DateRange
-import androidx.compose.material.icons.filled.Place
-import androidx.compose.material3.AssistChip
-import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.ButtonDefaults
@@ -150,73 +151,91 @@ private fun AppRow(app: App, onOpen: () -> Unit) {
     }
 }
 /**
- * In the style of the cards on m3.material.io: a tall dark banner framed by a grid pattern with
- * the company set large in the middle, then a plain text body: dates, title, summary and the
- * details. The banner opens the company's LinkedIn page.
+ * A faithful copy of the news cards on m3.material.io (measured from the live page): a flat
+ * surface-container-low card with 24dp corners, a 2:1 banner framed by a 14 × 7 grid whose middle
+ * window is left clear and carries the company set large, then a 24dp-padded stack of
+ * date (16/24), title (24/32 medium) and description (16/24, on-surface-variant) with 8dp gaps.
+ * The banner opens the company's LinkedIn page.
  */
 @Composable
 private fun RoleCard(role: Role, index: Int, modifier: Modifier = Modifier) {
     val uriHandler = LocalUriHandler.current
-    val (field, ink) = listOf(
-        Color(0xFF0D2B1C) to Color(0xFF5CFF9F),
-        Color(0xFF0E2A2A) to Color(0xFF8DD3C8),
-        Color(0xFF1B1540) to Color(0xFFCDA4FF),
-        Color(0xFF2A1B10) to Color(0xFFFFB874),
+    // Field, grid line, title. The third set is the reference card's own purple.
+    val (field, line, ink) = listOf(
+        Triple(Color(0xFF0D2B1C), Color(0xFF3FBF7F), Color(0xFF5CFF9F)),
+        Triple(Color(0xFF0E2A2A), Color(0xFF4FA8A0), Color(0xFF8DD3C8)),
+        Triple(Color(0xFF2A0C35), Color(0xFFA46BD6), Color(0xFFED9EFF)),
+        Triple(Color(0xFF2A1B10), Color(0xFFC47A3C), Color(0xFFFFB874)),
     )[index % 4]
+    val corner = RoundedCornerShape(24.dp)
 
-    ElevatedCard(modifier.fillMaxWidth().hoverLift(), shape = MaterialTheme.shapes.extraLarge) {
+    Card(
+        modifier = modifier.fillMaxWidth().hoverLift(),
+        shape = corner,
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+    ) {
         Column {
-            Box(
+            BoxWithConstraints(
                 Modifier
                     .fillMaxWidth()
-                    .aspectRatio(2f)
+                    .aspectRatio(584f / 298f)
+                    .clip(corner)
                     .background(field)
-                    .gridFrame(field, ink.copy(alpha = 0.55f))
+                    .gridFrame(field, line)
                     .clickable { uriHandler.openUri(role.linkedin) },
                 contentAlignment = Alignment.Center,
             ) {
-                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                    Box(Modifier.size(48.dp).clip(MaterialTheme.shapes.medium).background(Color.White), contentAlignment = Alignment.Center) {
+                val bannerWidth = maxWidth
+                val titleSize = (bannerWidth.value * 0.1f).sp
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(14.dp)) {
+                    Box(Modifier.size(bannerWidth * 0.075f).clip(MaterialTheme.shapes.small).background(Color.White), contentAlignment = Alignment.Center) {
                         Image(
                             painter = painterResource(role.logo),
                             contentDescription = "${role.company} logo",
                             contentScale = ContentScale.Fit,
-                            modifier = Modifier.size(36.dp).clip(MaterialTheme.shapes.extraSmall),
+                            modifier = Modifier.size(bannerWidth * 0.056f).clip(MaterialTheme.shapes.extraSmall),
                         )
                     }
-                    Text(role.company, style = MaterialTheme.typography.displaySmallEmphasized, color = ink)
+                    Text(
+                        role.company,
+                        fontSize = titleSize,
+                        lineHeight = titleSize,
+                        fontWeight = FontWeight.Medium,
+                        letterSpacing = (-0.5).sp,
+                        color = ink,
+                        softWrap = false,
+                    )
                 }
-                Icon(
-                    painterResource(Res.drawable.ic_open_in_new),
-                    contentDescription = "${role.company} on LinkedIn",
-                    tint = ink.copy(alpha = 0.8f),
-                    modifier = Modifier.align(Alignment.TopEnd).padding(16.dp).size(18.dp),
-                )
             }
-            Column(Modifier.padding(24.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                Text(role.period, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                Text(role.title, style = MaterialTheme.typography.headlineSmallEmphasized, color = MaterialTheme.colorScheme.onSurface)
-                Text(role.summary, style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    AssistChip(
-                        onClick = {},
-                        label = { Text(role.arrangement) },
-                        leadingIcon = { Icon(Icons.Filled.DateRange, contentDescription = null, modifier = Modifier.size(AssistChipDefaults.IconSize)) },
-                    )
-                    AssistChip(
-                        onClick = {},
-                        label = { Text(role.place) },
-                        leadingIcon = { Icon(Icons.Filled.Place, contentDescription = null, modifier = Modifier.size(AssistChipDefaults.IconSize)) },
-                    )
-                }
+            Column(Modifier.padding(24.dp)) {
+                Text(
+                    "${role.period} · ${role.arrangement} · ${role.place}",
+                    fontSize = 16.sp, lineHeight = 24.sp, fontWeight = FontWeight.Normal,
+                    color = MaterialTheme.colorScheme.onSurface,
+                )
+                Spacer(Modifier.height(16.dp))
+                Text(
+                    role.title,
+                    fontSize = 24.sp, lineHeight = 32.sp, fontWeight = FontWeight.Medium,
+                    color = MaterialTheme.colorScheme.onSurface,
+                )
+                Spacer(Modifier.height(8.dp))
+                Text(
+                    role.summary,
+                    fontSize = 16.sp, lineHeight = 24.sp, fontWeight = FontWeight.Normal,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                Spacer(Modifier.height(16.dp))
                 Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                     role.highlights.forEach { line ->
                         Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                            Text("•", style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.primary, modifier = Modifier.width(10.dp))
-                            Text(line, style = MaterialTheme.typography.bodyLarge)
+                            Text("•", fontSize = 16.sp, lineHeight = 24.sp, color = MaterialTheme.colorScheme.primary, modifier = Modifier.width(10.dp))
+                            Text(line, fontSize = 16.sp, lineHeight = 24.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                         }
                     }
                 }
+                Spacer(Modifier.height(16.dp))
                 FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     role.stack.forEach { SuggestionChip(onClick = {}, label = { Text(it) }, modifier = Modifier.hoverLift(lift = 1.dp)) }
                 }
@@ -225,15 +244,17 @@ private fun RoleCard(role: Role, index: Int, modifier: Modifier = Modifier) {
     }
 }
 
-/** The m3.material.io banner grid: thin cells around the edge, the middle left as a clear window. */
+/**
+ * The reference banner's grid: 14 columns by 7 rows of square cells, vertical lines on the
+ * half-cell, horizontal lines on the cell, and a clear window inset 1.5 cells horizontally and
+ * one cell vertically. Measured from the "Compose First" illustration.
+ */
 private fun Modifier.gridFrame(field: Color, line: Color): Modifier = drawBehind {
-    val cell = 44.dp.toPx()
+    val cell = size.width / 14f
     val stroke = 1.dp.toPx()
-    var x = 0f
-    while (x <= size.width + 1f) { drawLine(line, Offset(x, 0f), Offset(x, size.height), stroke); x += cell }
-    var y = 0f
-    while (y <= size.height + 1f) { drawLine(line, Offset(0f, y), Offset(size.width, y), stroke); y += cell }
-    val insetX = cell * 1.5f
-    val insetY = cell * 1f
-    drawRect(field, topLeft = Offset(insetX, insetY), size = Size(size.width - 2 * insetX, size.height - 2 * insetY))
+    var x = cell / 2f
+    while (x < size.width) { drawLine(line, Offset(x, 0f), Offset(x, size.height), stroke); x += cell }
+    var y = cell
+    while (y < size.height) { drawLine(line, Offset(0f, y), Offset(size.width, y), stroke); y += cell }
+    drawRect(field, topLeft = Offset(cell * 1.5f, cell), size = Size(size.width - cell * 3f, size.height - cell * 2f))
 }
