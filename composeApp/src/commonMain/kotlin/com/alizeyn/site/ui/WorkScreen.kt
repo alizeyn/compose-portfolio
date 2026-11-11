@@ -19,6 +19,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.lerp
+import androidx.compose.ui.graphics.luminance
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.layout.width
@@ -157,11 +161,16 @@ private fun RoleCard(role: Role, index: Int, modifier: Modifier = Modifier) {
     val corner = RoundedCornerShape(24.dp)
     val field = role.brand
     val ink = role.brandInk
+    val scheme = MaterialTheme.colorScheme
+    val darkTheme = scheme.surface.luminance() < 0.5f
+    // The body takes a faded version of the header: a wash of the light ink on light surfaces,
+    // a deeper wash of the brand colour itself on dark ones.
+    val body = if (darkTheme) lerp(scheme.surfaceContainerLow, field, 0.45f) else lerp(scheme.surfaceContainerLow, ink, 0.16f)
 
     Card(
         modifier = modifier.fillMaxWidth().hoverLift(),
         shape = corner,
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
+        colors = CardDefaults.cardColors(containerColor = body),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
     ) {
         Column {
@@ -170,6 +179,7 @@ private fun RoleCard(role: Role, index: Int, modifier: Modifier = Modifier) {
                     .fillMaxWidth()
                     .clip(corner)
                     .background(field)
+                    .dotPattern(ink)
                     .clickable { uriHandler.openUri(role.linkedin) }
                     .padding(horizontal = 24.dp, vertical = 20.dp),
             ) {
@@ -222,5 +232,18 @@ private fun RoleCard(role: Role, index: Int, modifier: Modifier = Modifier) {
                 }
             }
         }
+    }
+}
+
+/** A quiet dot grid in the ink colour, 12dp apart, that gives the header some texture. */
+private fun Modifier.dotPattern(ink: Color): Modifier = drawBehind {
+    val step = 12.dp.toPx()
+    val r = 1.dp.toPx()
+    val color = ink.copy(alpha = 0.22f)
+    var y = step / 2f
+    while (y < size.height) {
+        var x = step / 2f
+        while (x < size.width) { drawCircle(color, r, Offset(x, y)); x += step }
+        y += step
     }
 }
