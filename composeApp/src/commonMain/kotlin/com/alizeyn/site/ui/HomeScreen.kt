@@ -5,12 +5,19 @@ import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.graphics.graphicsLayer
 import com.alizeyn.site.data.SkillGroup
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.animateIntAsState
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
@@ -71,15 +78,6 @@ import com.alizeyn.site.resources.ic_work
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
 
-private data class Fact(val icon: DrawableResource, val title: String, val body: String)
-
-private val facts = listOf(
-    Fact(Res.drawable.ic_work, "Almost ten years · Four teams", "Shipping Android since 2017, from Java and XML to Kotlin and Compose, for apps used by millions."),
-    Fact(Res.drawable.ic_school, "Studied", "B.Sc. Software Engineering, Ferdowsi University of Mashhad, 2015–2019."),
-    Fact(Res.drawable.ic_language, "Languages", "Persian natively, English fluently, German at B1."),
-    Fact(Res.drawable.ic_camera, "Off hours", "Generative art, producing music, photography, hiking, and a lot of tea."),
-)
-
 /** Home and About in one page: hero, pitch, story and facts, then the toolkit. */
 @Composable
 fun HomeScreen(widthClass: WidthClass, onEmail: () -> Unit, onWork: () -> Unit) {
@@ -93,19 +91,25 @@ fun HomeScreen(widthClass: WidthClass, onEmail: () -> Unit, onWork: () -> Unit) 
 
 @Composable
 private fun Hero(widthClass: WidthClass, onEmail: () -> Unit, onWork: () -> Unit) {
-    when (widthClass) {
-        // Phones: portrait and the three chips share one row, then the copy below.
-        WidthClass.Compact -> Column(verticalArrangement = Arrangement.spacedBy(20.dp)) {
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-                Reveal(pop = true) { Portrait(size = 128.dp) }
-                // Chips hug the trailing edge, right-aligned.
-                Reveal(delayMillis = 60) { HeroChips(onWork, stacked = true) }
+    MotionPathBackground(subtle = widthClass == WidthClass.Compact) {
+        when (widthClass) {
+            // Phones: portrait and the three chips share one row, then the copy below.
+            WidthClass.Compact -> Column(Modifier.padding(vertical = 16.dp), verticalArrangement = Arrangement.spacedBy(20.dp)) {
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                    Reveal(pop = true) { Portrait(size = 128.dp) }
+                    // Chips hug the trailing edge, right-aligned.
+                    Reveal(delayMillis = 60) { HeroChips(onWork, stacked = true) }
+                }
+                HeroCopy(Modifier.fillMaxWidth(), onEmail, onWork, withChips = false)
             }
-            HeroCopy(Modifier.fillMaxWidth(), onEmail, onWork, withChips = false)
-        }
-        else -> Row(horizontalArrangement = Arrangement.spacedBy(32.dp), verticalAlignment = Alignment.CenterVertically) {
-            HeroCopy(Modifier.weight(1f), onEmail, onWork, withChips = true)
-            Reveal(pop = true, delayMillis = 150) { Portrait(size = if (widthClass == WidthClass.Expanded) 260.dp else 200.dp) }
+            else -> Row(
+                Modifier.padding(vertical = 40.dp),
+                horizontalArrangement = Arrangement.spacedBy(32.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                HeroCopy(Modifier.weight(1f), onEmail, onWork, withChips = true)
+                Reveal(pop = true, delayMillis = 150) { Portrait(size = if (widthClass == WidthClass.Expanded) 260.dp else 200.dp) }
+            }
         }
     }
 }
@@ -239,29 +243,124 @@ private fun About(widthClass: WidthClass) {
                 Column(Modifier.weight(3f), verticalArrangement = Arrangement.spacedBy(16.dp)) {
                     about.forEachIndexed { i, p -> Reveal(delayMillis = i * 80) { AccentParagraph(p) } }
                 }
-                Column(Modifier.weight(2f), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    facts.forEachIndexed { i, f -> Reveal(delayMillis = 120 + i * 80) { FactCard(f) } }
-                }
+                Column(Modifier.weight(2f)) { Facts(widthClass) }
             }
         } else {
             Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
                 about.forEachIndexed { i, p -> Reveal(delayMillis = i * 60) { AccentParagraph(p) } }
             }
-            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                facts.forEachIndexed { i, f -> Reveal(delayMillis = i * 60) { FactCard(f) } }
+            Facts(widthClass)
+        }
+    }
+}
+
+private data class Language(val name: String, val level: String, val meter: Int)
+
+private val languages = listOf(
+    Language("Persian", "native", 4),
+    Language("English", "fluent", 4),
+    Language("German", "B1", 2),
+)
+
+private val offHours = listOf("Generative art", "Producing music", "Photography", "Hiking", "A lot of tea")
+
+/**
+ * The facts as a small bento: three stat tiles whose numbers count up, a study card, a
+ * languages meter and the off-hours pills.
+ */
+@Composable
+private fun Facts(widthClass: WidthClass) {
+    val scheme = MaterialTheme.colorScheme
+    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        Reveal(delayMillis = 120) {
+            Row(Modifier.height(IntrinsicSize.Max), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                StatTile(10, "", "years of Android", scheme.primaryContainer, scheme.onPrimaryContainer, Modifier.weight(1f).fillMaxHeight())
+                StatTile(4, "", "teams, two countries", scheme.secondaryContainer, scheme.onSecondaryContainer, Modifier.weight(1f).fillMaxHeight())
+                StatTile(10, "M+", "people on my apps", scheme.tertiaryContainer, scheme.onTertiaryContainer, Modifier.weight(1f).fillMaxHeight())
+            }
+        }
+        Reveal(delayMillis = 200) {
+            FactTile(scheme.surfaceContainerHigh) {
+                Row(horizontalArrangement = Arrangement.spacedBy(14.dp), verticalAlignment = Alignment.CenterVertically) {
+                    Icon(painterResource(Res.drawable.ic_school), contentDescription = null, tint = scheme.primary, modifier = Modifier.size(28.dp))
+                    Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                        Text("B.Sc. Software Engineering", style = MaterialTheme.typography.titleMedium, color = scheme.onSurface)
+                        Text("Ferdowsi University of Mashhad · 2015–2019", style = MaterialTheme.typography.bodyMedium, color = scheme.onSurfaceVariant)
+                    }
+                }
+            }
+        }
+        Reveal(delayMillis = 280) {
+            FactTile(scheme.surfaceContainerHigh) {
+                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    Row(horizontalArrangement = Arrangement.spacedBy(14.dp), verticalAlignment = Alignment.CenterVertically) {
+                        Icon(painterResource(Res.drawable.ic_language), contentDescription = null, tint = scheme.primary, modifier = Modifier.size(28.dp))
+                        Text("Languages", style = MaterialTheme.typography.titleMedium, color = scheme.onSurface)
+                    }
+                    languages.forEach { LanguageRow(it) }
+                }
+            }
+        }
+        Reveal(delayMillis = 360) {
+            FactTile(scheme.surfaceContainerHigh) {
+                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    Row(horizontalArrangement = Arrangement.spacedBy(14.dp), verticalAlignment = Alignment.CenterVertically) {
+                        Icon(painterResource(Res.drawable.ic_camera), contentDescription = null, tint = scheme.primary, modifier = Modifier.size(28.dp))
+                        Text("Off hours", style = MaterialTheme.typography.titleMedium, color = scheme.onSurface)
+                    }
+                    FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                        offHours.forEach { hobby ->
+                            Text(
+                                hobby,
+                                style = MaterialTheme.typography.labelLarge,
+                                softWrap = false,
+                                color = scheme.onSecondaryContainer,
+                                modifier = Modifier.clip(CircleShape).background(scheme.secondaryContainer).padding(horizontal = 12.dp, vertical = 6.dp),
+                            )
+                        }
+                    }
+                }
             }
         }
     }
 }
 
 @Composable
-private fun FactCard(fact: Fact) {
-    OutlinedCard(Modifier.fillMaxWidth().hoverLift()) {
-        Row(Modifier.padding(16.dp), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-            Icon(painterResource(fact.icon), contentDescription = null, tint = MaterialTheme.colorScheme.primary)
-            Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                Text(fact.title, style = MaterialTheme.typography.titleMedium)
-                Text(fact.body, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+private fun FactTile(color: Color, content: @Composable () -> Unit) {
+    Box(Modifier.fillMaxWidth().clip(RoundedCornerShape(20.dp)).background(color).hoverLift().padding(18.dp)) { content() }
+}
+
+/** A tonal tile with a number that counts up from zero the first time it is shown. */
+@Composable
+private fun StatTile(value: Int, suffix: String, label: String, container: Color, ink: Color, modifier: Modifier = Modifier) {
+    var target by remember { mutableStateOf(0) }
+    LaunchedEffect(Unit) { target = value }
+    val shown by animateIntAsState(target, tween(1500, delayMillis = 300, easing = FastOutSlowInEasing), label = "count")
+    Column(
+        modifier.clip(RoundedCornerShape(20.dp)).background(container).hoverLift().padding(horizontal = 16.dp, vertical = 14.dp),
+        verticalArrangement = Arrangement.spacedBy(2.dp),
+    ) {
+        Text("$shown$suffix", style = MaterialTheme.typography.displaySmallEmphasized, color = ink, softWrap = false)
+        Text(label, style = MaterialTheme.typography.labelLarge, color = ink.copy(alpha = 0.85f))
+    }
+}
+
+/** Name, level and a four-segment meter, the segments filling in with a stagger. */
+@Composable
+private fun LanguageRow(language: Language) {
+    val scheme = MaterialTheme.colorScheme
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Text(language.name, style = MaterialTheme.typography.bodyLarge, color = scheme.onSurface, modifier = Modifier.width(96.dp))
+        Text(language.level, style = MaterialTheme.typography.bodyMedium, color = scheme.onSurfaceVariant, modifier = Modifier.weight(1f))
+        Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+            repeat(4) { i ->
+                var on by remember { mutableStateOf(false) }
+                LaunchedEffect(Unit) { on = true }
+                val fill by animateColorAsState(
+                    if (on && i < language.meter) scheme.primary else scheme.outlineVariant.copy(alpha = 0.5f),
+                    tween(400, delayMillis = 500 + i * 120), label = "segment",
+                )
+                Box(Modifier.size(width = 22.dp, height = 8.dp).clip(CircleShape).background(fill))
             }
         }
     }
@@ -282,10 +381,12 @@ private fun Toolkit(widthClass: WidthClass) {
             }
         } else {
             toolkit.chunked(2).forEachIndexed { rowIndex, pair ->
-                Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.Top) {
+                // Intrinsic height keeps both cards in a row the same height; the chips opt out of
+                // soft wrapping so the flow row's intrinsic estimate matches its real layout.
+                Row(Modifier.height(IntrinsicSize.Max), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                     pair.forEachIndexed { i, group ->
-                        Reveal(Modifier.weight(1f), delayMillis = (rowIndex * 2 + i) * 60) {
-                            ToolkitCard(group, rowIndex * 2 + i)
+                        Reveal(Modifier.weight(1f).fillMaxHeight(), delayMillis = (rowIndex * 2 + i) * 60) {
+                            ToolkitCard(group, rowIndex * 2 + i, Modifier.fillMaxHeight())
                         }
                     }
                 }
@@ -335,6 +436,7 @@ private fun ToolkitCard(group: SkillGroup, index: Int, modifier: Modifier = Modi
                     Text(
                         skill,
                         style = MaterialTheme.typography.labelLarge,
+                        softWrap = false,
                         color = if (solid) container else ink,
                         modifier = Modifier
                             .clip(CircleShape)
