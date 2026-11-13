@@ -1,5 +1,15 @@
 package com.alizeyn.site.ui
 
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.graphics.graphicsLayer
+import com.alizeyn.site.data.SkillGroup
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
@@ -30,7 +40,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.toShape
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedCard
-import androidx.compose.material3.SuggestionChip
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -39,6 +48,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.ColorMatrix
 import androidx.compose.ui.graphics.luminance
@@ -64,6 +74,7 @@ import org.jetbrains.compose.resources.painterResource
 private data class Fact(val icon: DrawableResource, val title: String, val body: String)
 
 private val facts = listOf(
+    Fact(Res.drawable.ic_work, "Almost ten years · Four teams", "Shipping Android since 2017, from Java and XML to Kotlin and Compose, for apps used by millions."),
     Fact(Res.drawable.ic_school, "Studied", "B.Sc. Software Engineering, Ferdowsi University of Mashhad, 2015–2019."),
     Fact(Res.drawable.ic_language, "Languages", "Persian natively, English fluently, German at B1."),
     Fact(Res.drawable.ic_camera, "Off hours", "Generative art, producing music, photography, hiking, and a lot of tea."),
@@ -139,9 +150,7 @@ private fun HeroChips(onWork: () -> Unit, stacked: Boolean) {
  * near-black shadows with mint highlights in dark. The two ends animate with the theme toggle.
  */
 @Composable
-private fun Portrait(size: Dp) {
-    // One of the Material 3 Expressive shapes: a 12-sided cookie, shallow scallops.
-    val shape = MaterialShapes.Cookie12Sided.toShape()
+fun Portrait(size: Dp, shape: Shape = RoundedCornerShape(28.dp)) {
     val dark = MaterialTheme.colorScheme.background.luminance() < 0.5f
     val shadow by animateColorAsState(if (dark) Color(0xFF071009) else Color(0xFF0B3D27), tween(450), label = "shadow")
     val highlight by animateColorAsState(if (dark) Color(0xFFBFECD8) else Color(0xFFF1FDF0), tween(450), label = "highlight")
@@ -224,7 +233,7 @@ private fun HeroCopy(modifier: Modifier, onEmail: () -> Unit, onWork: () -> Unit
 @Composable
 private fun About(widthClass: WidthClass) {
     Column(verticalArrangement = Arrangement.spacedBy(24.dp)) {
-        Reveal { SectionHeader("About · Development and product design", "Multidisciplinary engineer") }
+        Reveal { SectionHeader("About · Development and product design", "Engineer & (Product) Designer") }
         if (widthClass == WidthClass.Expanded) {
             Row(horizontalArrangement = Arrangement.spacedBy(32.dp)) {
                 Column(Modifier.weight(3f), verticalArrangement = Arrangement.spacedBy(16.dp)) {
@@ -258,29 +267,80 @@ private fun FactCard(fact: Fact) {
     }
 }
 
+/**
+ * The toolkit as a bento of four tonal cards, one per skill group. Each card wears a different
+ * container colour and a slowly turning Material shape in its corner; the first three skills of
+ * a group are set as solid pills, the rest as quiet ones, so the headline tools read first.
+ */
 @Composable
 private fun Toolkit(widthClass: WidthClass) {
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Reveal { SectionHeader("Toolkit", "What I build with") }
-        toolkit.forEachIndexed { groupIndex, group ->
-            Reveal(delayMillis = groupIndex * 50) {
-                val chips: @Composable () -> Unit = {
-                    FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                        group.skills.forEach { skill ->
-                            SuggestionChip(onClick = {}, label = { Text(skill, style = MaterialTheme.typography.labelMedium) }, modifier = Modifier.hoverLift(lift = 1.dp))
+        if (widthClass == WidthClass.Compact) {
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                toolkit.forEachIndexed { i, group -> Reveal(delayMillis = i * 60) { ToolkitCard(group, i) } }
+            }
+        } else {
+            toolkit.chunked(2).forEachIndexed { rowIndex, pair ->
+                Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.Top) {
+                    pair.forEachIndexed { i, group ->
+                        Reveal(Modifier.weight(1f), delayMillis = (rowIndex * 2 + i) * 60) {
+                            ToolkitCard(group, rowIndex * 2 + i)
                         }
                     }
                 }
-                if (widthClass == WidthClass.Compact) {
-                    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                        Text(group.title, style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                        chips()
-                    }
-                } else {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text(group.title, style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.width(132.dp))
-                        chips()
-                    }
+            }
+        }
+    }
+}
+
+@Composable
+private fun ToolkitCard(group: SkillGroup, index: Int, modifier: Modifier = Modifier) {
+    val scheme = MaterialTheme.colorScheme
+    val (container, ink) = listOf(
+        scheme.primaryContainer to scheme.onPrimaryContainer,
+        scheme.tertiaryContainer to scheme.onTertiaryContainer,
+        scheme.secondaryContainer to scheme.onSecondaryContainer,
+        scheme.surfaceContainerHighest to scheme.onSurface,
+    )[index % 4]
+    val decor = listOf(MaterialShapes.Sunny, MaterialShapes.Clover8Leaf, MaterialShapes.Cookie9Sided, MaterialShapes.Burst)[index % 4].toShape()
+    val spin = rememberInfiniteTransition(label = "toolkitSpin")
+    val angle by spin.animateFloat(
+        initialValue = 0f, targetValue = 360f,
+        animationSpec = infiniteRepeatable(tween(durationMillis = 36000 + index * 6000, easing = LinearEasing)),
+        label = "toolkitAngle",
+    )
+    Box(
+        modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(24.dp))
+            .background(container)
+            .hoverLift(),
+    ) {
+        // Slowly turning shape, cut off by the card's corner.
+        Box(
+            Modifier
+                .align(Alignment.TopEnd)
+                .offset(x = 28.dp, y = (-28).dp)
+                .size(120.dp)
+                .graphicsLayer { rotationZ = angle }
+                .clip(decor)
+                .background(ink.copy(alpha = 0.10f)),
+        )
+        Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
+            Text(group.title, style = MaterialTheme.typography.headlineSmallEmphasized, color = ink)
+            FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                group.skills.forEachIndexed { i, skill ->
+                    val solid = i < 3
+                    Text(
+                        skill,
+                        style = MaterialTheme.typography.labelLarge,
+                        color = if (solid) container else ink,
+                        modifier = Modifier
+                            .clip(CircleShape)
+                            .background(if (solid) ink else ink.copy(alpha = 0.10f))
+                            .padding(horizontal = 12.dp, vertical = 6.dp),
+                    )
                 }
             }
         }
