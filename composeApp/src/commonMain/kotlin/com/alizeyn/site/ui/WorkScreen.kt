@@ -5,6 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -93,15 +94,21 @@ private fun AppShelf(widthClass: WidthClass) {
             apps.forEachIndexed { i, app -> Reveal(delayMillis = i * 60) { AppRow(app, onOpen = { uriHandler.openUri(app.playUrl) }) } }
         }
     } else {
-        // Cards share each row evenly: all five across on desktop, three per row on tablets.
-        FlowRow(
-            horizontalArrangement = Arrangement.spacedBy(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-            maxItemsInEachRow = if (widthClass == WidthClass.Expanded) 5 else 3,
-        ) {
-            apps.forEachIndexed { i, app ->
-                Reveal(Modifier.weight(1f), delayMillis = i * 60) { AppCard(app, onOpen = { uriHandler.openUri(app.playUrl) }) }
+        // Cards share each row evenly and match heights: all five across when there is room, else three per row.
+        BoxWithConstraints {
+        val perRow = if (maxWidth >= 960.dp) 5 else 3
+        Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+            apps.chunked(perRow).forEachIndexed { rowIndex, row ->
+                Row(Modifier.height(IntrinsicSize.Max), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                    row.forEachIndexed { i, app ->
+                        Reveal(Modifier.weight(1f).fillMaxHeight(), delayMillis = (rowIndex * perRow + i) * 60) {
+                            AppCard(app, onOpen = { uriHandler.openUri(app.playUrl) }, modifier = Modifier.fillMaxHeight())
+                        }
+                    }
+                    repeat(perRow - row.size) { Spacer(Modifier.weight(1f)) }
+                }
             }
+        }
         }
     }
 }
@@ -117,15 +124,17 @@ private fun AppIcon(app: App, size: Dp) {
 }
 
 @Composable
-private fun AppCard(app: App, onOpen: () -> Unit) {
-    ElevatedCard(Modifier.fillMaxWidth().hoverLift().clickable(onClick = onOpen)) {
-        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+private fun AppCard(app: App, onOpen: () -> Unit, modifier: Modifier = Modifier) {
+    ElevatedCard(modifier.fillMaxWidth().hoverLift().clickable(onClick = onOpen)) {
+        Column(Modifier.fillMaxHeight().padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             AppIcon(app, 64.dp)
             Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
                 Text(app.name, style = MaterialTheme.typography.titleMedium)
                 Text(app.company, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.primary)
             }
             Text(app.blurb, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            // The button sits on the bottom edge whatever the blurb length.
+            Spacer(Modifier.weight(1f))
             FilledTonalButton(onClick = onOpen, shapes = ButtonDefaults.shapes(), contentPadding = ButtonDefaults.ButtonWithIconContentPadding) {
                 Text("Play Store")
                 Spacer(Modifier.size(ButtonDefaults.IconSpacing))

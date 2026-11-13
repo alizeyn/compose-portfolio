@@ -248,9 +248,11 @@ private fun DrawScope.drawBugdroid(u: Float, armAngle: Float, eye: Color, outlin
     val head = Rect(26f * u, 14f * u, 74f * u, 62f * u)
     drawArc(green, startAngle = 180f, sweepAngle = 180f, useCenter = true, topLeft = head.topLeft, size = head.size)
     drawArc(outline, startAngle = 180f, sweepAngle = 180f, useCenter = true, topLeft = head.topLeft, size = head.size, style = stroke)
-    // Eyes.
-    drawCircle(eye, radius = 2.6f * u, center = Offset(41f * u, 29f * u))
-    drawCircle(eye, radius = 2.6f * u, center = Offset(59f * u, 29f * u))
+    // Eyes, outlined like every other part.
+    for (cx in listOf(41f, 59f)) {
+        drawCircle(eye, radius = 2.6f * u, center = Offset(cx * u, 29f * u))
+        drawCircle(outline, radius = 2.6f * u, center = Offset(cx * u, 29f * u), style = stroke)
+    }
     // Legs first, tucked under the body so only their lower part shows; then the body over them.
     part(bottomRounded(r(36f, 72f, 8f, 20f), 4f * u))
     part(bottomRounded(r(56f, 72f, 8f, 20f), 4f * u))
