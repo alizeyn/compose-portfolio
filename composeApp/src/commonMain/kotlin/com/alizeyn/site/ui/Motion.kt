@@ -170,10 +170,10 @@ fun shimmerBrush(): Brush {
         label = "shimmerShift",
     )
     val primary = MaterialTheme.colorScheme.primary
-    val tertiary = MaterialTheme.colorScheme.tertiary
+    val light = MaterialTheme.colorScheme.primaryContainer
     val x = shift * 500f
     return Brush.linearGradient(
-        colors = listOf(primary, AndroidGreen, tertiary, primary),
+        colors = listOf(primary, AndroidGreen, light, primary),
         start = Offset(x - 250f, 0f),
         end = Offset(x + 450f, 160f),
     )
