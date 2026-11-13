@@ -23,6 +23,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
@@ -62,7 +63,9 @@ import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.alizeyn.site.WidthClass
 import com.alizeyn.site.data.Profile
 import com.alizeyn.site.data.about
@@ -75,6 +78,7 @@ import com.alizeyn.site.resources.ic_linkedin
 import com.alizeyn.site.resources.ic_palette
 import com.alizeyn.site.resources.ic_school
 import com.alizeyn.site.resources.ic_work
+import androidx.graphics.shapes.RoundedPolygon
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
 
@@ -100,15 +104,15 @@ private fun Hero(widthClass: WidthClass, onEmail: () -> Unit, onWork: () -> Unit
                     // Chips hug the trailing edge, right-aligned.
                     Reveal(delayMillis = 60) { HeroChips(onWork, stacked = true) }
                 }
-                HeroCopy(Modifier.fillMaxWidth(), onEmail, onWork, withChips = false)
+                HeroCopy(Modifier.fillMaxWidth(), onEmail, onWork, withChips = false, widthClass = widthClass)
             }
             else -> Row(
-                Modifier.padding(vertical = 40.dp),
+                Modifier.padding(vertical = if (widthClass == WidthClass.Expanded) 88.dp else 56.dp),
                 horizontalArrangement = Arrangement.spacedBy(32.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                HeroCopy(Modifier.weight(1f), onEmail, onWork, withChips = true)
-                Reveal(pop = true, delayMillis = 150) { Portrait(size = if (widthClass == WidthClass.Expanded) 260.dp else 200.dp) }
+                HeroCopy(Modifier.weight(1f), onEmail, onWork, withChips = true, widthClass = widthClass)
+                Reveal(pop = true, delayMillis = 150) { Portrait(size = if (widthClass == WidthClass.Expanded) 300.dp else 220.dp) }
             }
         }
     }
@@ -181,20 +185,28 @@ private fun duotone(shadow: Color, highlight: Color): ColorMatrix {
 }
 
 @Composable
-private fun HeroCopy(modifier: Modifier, onEmail: () -> Unit, onWork: () -> Unit, withChips: Boolean) {
+private fun HeroCopy(modifier: Modifier, onEmail: () -> Unit, onWork: () -> Unit, withChips: Boolean, widthClass: WidthClass) {
     val uriHandler = LocalUriHandler.current
+    // Sized after the m3.material.io blog header: a display name around 88px on desktop, a
+    // headline-sized standfirst under it.
+    val name = when (widthClass) {
+        WidthClass.Expanded -> MaterialTheme.typography.displayLargeEmphasized.copy(fontSize = 88.sp, lineHeight = 92.sp, letterSpacing = (-2.5).sp)
+        WidthClass.Medium -> MaterialTheme.typography.displayLargeEmphasized.copy(fontSize = 76.sp, lineHeight = 80.sp, letterSpacing = (-2).sp)
+        WidthClass.Compact -> MaterialTheme.typography.displayLargeEmphasized
+    }
+    val standfirst = if (widthClass == WidthClass.Compact) MaterialTheme.typography.headlineSmall else MaterialTheme.typography.headlineMedium
     Column(modifier, verticalArrangement = Arrangement.spacedBy(16.dp)) {
         if (withChips) Reveal { HeroChips(onWork, stacked = false) }
         Reveal(delayMillis = 90) {
             Column {
-                Text(Profile.firstName, style = MaterialTheme.typography.displayLargeEmphasized, color = MaterialTheme.colorScheme.onBackground)
-                Text(Profile.lastName, style = MaterialTheme.typography.displayLargeEmphasized.copy(brush = shimmerBrush()))
+                Text(Profile.firstName, style = name, color = MaterialTheme.colorScheme.onBackground)
+                Text(Profile.lastName, style = name.copy(brush = shimmerBrush()))
             }
         }
         Reveal(delayMillis = 180) {
             Text(
                 Profile.tagline,
-                style = MaterialTheme.typography.titleLarge,
+                style = standfirst.copy(fontWeight = FontWeight.Normal),
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
@@ -254,19 +266,12 @@ private fun About(widthClass: WidthClass) {
     }
 }
 
-private data class Language(val name: String, val level: String, val meter: Int)
-
-private val languages = listOf(
-    Language("Persian", "native", 4),
-    Language("English", "fluent", 4),
-    Language("German", "B1", 2),
-)
-
-private val offHours = listOf("Generative art", "Producing music", "Photography", "Hiking", "A lot of tea")
+private val languages = listOf("Persian · native", "English · fluent", "German · B1")
+private val offHours = listOf("Generative art", "Music", "Photography", "Hiking", "Tea")
 
 /**
- * The facts as a small bento: three stat tiles whose numbers count up, a study card, a
- * languages meter and the off-hours pills.
+ * The facts as a small bento: three stat tiles whose numbers count up, a study card, then
+ * languages and off-hours side by side as pill tiles.
  */
 @Composable
 private fun Facts(widthClass: WidthClass) {
@@ -274,9 +279,9 @@ private fun Facts(widthClass: WidthClass) {
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Reveal(delayMillis = 120) {
             Row(Modifier.height(IntrinsicSize.Max), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                StatTile(10, "", "years of Android", scheme.primaryContainer, scheme.onPrimaryContainer, Modifier.weight(1f).fillMaxHeight())
-                StatTile(4, "", "teams, two countries", scheme.secondaryContainer, scheme.onSecondaryContainer, Modifier.weight(1f).fillMaxHeight())
-                StatTile(10, "M+", "people on my apps", scheme.tertiaryContainer, scheme.onTertiaryContainer, Modifier.weight(1f).fillMaxHeight())
+                StatTile(10, "", "years of Android", "since 2017", MaterialShapes.Sunny, scheme.primaryContainer, scheme.onPrimaryContainer, widthClass, Modifier.weight(1f).fillMaxHeight())
+                StatTile(4, "", "teams", "Austria and Iran", MaterialShapes.Clover8Leaf, scheme.secondaryContainer, scheme.onSecondaryContainer, widthClass, Modifier.weight(1f).fillMaxHeight())
+                StatTile(10, "M+", "people", "on my apps", MaterialShapes.Cookie9Sided, scheme.tertiaryContainer, scheme.onTertiaryContainer, widthClass, Modifier.weight(1f).fillMaxHeight())
             }
         }
         Reveal(delayMillis = 200) {
@@ -291,77 +296,85 @@ private fun Facts(widthClass: WidthClass) {
             }
         }
         Reveal(delayMillis = 280) {
-            FactTile(scheme.surfaceContainerHigh) {
-                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    Row(horizontalArrangement = Arrangement.spacedBy(14.dp), verticalAlignment = Alignment.CenterVertically) {
-                        Icon(painterResource(Res.drawable.ic_language), contentDescription = null, tint = scheme.primary, modifier = Modifier.size(28.dp))
-                        Text("Languages", style = MaterialTheme.typography.titleMedium, color = scheme.onSurface)
-                    }
-                    languages.forEach { LanguageRow(it) }
-                }
-            }
-        }
-        Reveal(delayMillis = 360) {
-            FactTile(scheme.surfaceContainerHigh) {
-                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    Row(horizontalArrangement = Arrangement.spacedBy(14.dp), verticalAlignment = Alignment.CenterVertically) {
-                        Icon(painterResource(Res.drawable.ic_camera), contentDescription = null, tint = scheme.primary, modifier = Modifier.size(28.dp))
-                        Text("Off hours", style = MaterialTheme.typography.titleMedium, color = scheme.onSurface)
-                    }
-                    FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                        offHours.forEach { hobby ->
-                            Text(
-                                hobby,
-                                style = MaterialTheme.typography.labelLarge,
-                                softWrap = false,
-                                color = scheme.onSecondaryContainer,
-                                modifier = Modifier.clip(CircleShape).background(scheme.secondaryContainer).padding(horizontal = 12.dp, vertical = 6.dp),
-                            )
-                        }
-                    }
-                }
+            Row(Modifier.height(IntrinsicSize.Max), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                PillTile(Res.drawable.ic_language, "Languages", languages, Modifier.weight(1f).fillMaxHeight())
+                PillTile(Res.drawable.ic_camera, "Off hours", offHours, Modifier.weight(1f).fillMaxHeight())
             }
         }
     }
 }
 
 @Composable
-private fun FactTile(color: Color, content: @Composable () -> Unit) {
-    Box(Modifier.fillMaxWidth().clip(RoundedCornerShape(20.dp)).background(color).hoverLift().padding(18.dp)) { content() }
+private fun FactTile(color: Color, modifier: Modifier = Modifier, content: @Composable () -> Unit) {
+    Box(modifier.fillMaxWidth().clip(RoundedCornerShape(20.dp)).background(color).hoverLift().padding(18.dp)) { content() }
 }
 
-/** A tonal tile with a number that counts up from zero the first time it is shown. */
+/** Icon, title and a wrap of pills. */
 @Composable
-private fun StatTile(value: Int, suffix: String, label: String, container: Color, ink: Color, modifier: Modifier = Modifier) {
+private fun PillTile(icon: DrawableResource, title: String, items: List<String>, modifier: Modifier = Modifier) {
+    val scheme = MaterialTheme.colorScheme
+    FactTile(scheme.surfaceContainerHigh, modifier) {
+        Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            Row(horizontalArrangement = Arrangement.spacedBy(10.dp), verticalAlignment = Alignment.CenterVertically) {
+                Icon(painterResource(icon), contentDescription = null, tint = scheme.primary, modifier = Modifier.size(24.dp))
+                Text(title, style = MaterialTheme.typography.titleMedium, color = scheme.onSurface)
+            }
+            PillFlow {
+                items.forEach { item ->
+                    Text(
+                        item,
+                        style = MaterialTheme.typography.labelLarge,
+                        softWrap = false,
+                        color = scheme.onSecondaryContainer,
+                        modifier = Modifier.clip(CircleShape).background(scheme.secondaryContainer).padding(horizontal = 12.dp, vertical = 6.dp),
+                    )
+                }
+            }
+        }
+    }
+}
+
+/**
+ * A tonal tile with a number that counts up from zero the first time it is shown, a label, a
+ * footnote and a Material shape turning slowly in the corner.
+ */
+@Composable
+private fun StatTile(
+    value: Int, suffix: String, label: String, note: String,
+    decor: RoundedPolygon, container: Color, ink: Color, widthClass: WidthClass, modifier: Modifier = Modifier,
+) {
     var target by remember { mutableStateOf(0) }
     LaunchedEffect(Unit) { target = value }
     val shown by animateIntAsState(target, tween(1500, delayMillis = 300, easing = FastOutSlowInEasing), label = "count")
-    Column(
-        modifier.clip(RoundedCornerShape(20.dp)).background(container).hoverLift().padding(horizontal = 16.dp, vertical = 14.dp),
-        verticalArrangement = Arrangement.spacedBy(2.dp),
-    ) {
-        Text("$shown$suffix", style = MaterialTheme.typography.displaySmallEmphasized, color = ink, softWrap = false)
-        Text(label, style = MaterialTheme.typography.labelLarge, color = ink.copy(alpha = 0.85f))
-    }
-}
-
-/** Name, level and a four-segment meter, the segments filling in with a stagger. */
-@Composable
-private fun LanguageRow(language: Language) {
-    val scheme = MaterialTheme.colorScheme
-    Row(verticalAlignment = Alignment.CenterVertically) {
-        Text(language.name, style = MaterialTheme.typography.bodyLarge, color = scheme.onSurface, modifier = Modifier.width(96.dp))
-        Text(language.level, style = MaterialTheme.typography.bodyMedium, color = scheme.onSurfaceVariant, modifier = Modifier.weight(1f))
-        Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-            repeat(4) { i ->
-                var on by remember { mutableStateOf(false) }
-                LaunchedEffect(Unit) { on = true }
-                val fill by animateColorAsState(
-                    if (on && i < language.meter) scheme.primary else scheme.outlineVariant.copy(alpha = 0.5f),
-                    tween(400, delayMillis = 500 + i * 120), label = "segment",
-                )
-                Box(Modifier.size(width = 22.dp, height = 8.dp).clip(CircleShape).background(fill))
+    val shape = decor.toShape()
+    val spin = rememberInfiniteTransition(label = "statSpin")
+    val angle by spin.animateFloat(
+        initialValue = 0f, targetValue = 360f,
+        animationSpec = infiniteRepeatable(tween(durationMillis = 40000, easing = LinearEasing)),
+        label = "statAngle",
+    )
+    Box(modifier.clip(RoundedCornerShape(20.dp)).background(container).hoverLift()) {
+        Box(
+            Modifier.align(Alignment.TopEnd).offset(x = 22.dp, y = (-22).dp).size(84.dp)
+                .graphicsLayer { rotationZ = angle }.clip(shape).background(ink.copy(alpha = 0.10f)),
+        )
+        Column(Modifier.padding(horizontal = 16.dp, vertical = 16.dp), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+            // Sized per width class so the widest value ("10M+") fits its tile on one line.
+            // (No BoxWithConstraints here: the tiles sit in an intrinsic-height row.)
+            val fit = when (widthClass) {
+                WidthClass.Expanded -> 38f
+                WidthClass.Medium -> 46f
+                WidthClass.Compact -> 32f
             }
+            Text(
+                "$shown$suffix",
+                style = MaterialTheme.typography.displayMediumEmphasized.copy(fontSize = fit.sp, lineHeight = (fit * 1.1f).sp),
+                color = ink,
+                softWrap = false,
+            )
+            Spacer(Modifier.height(6.dp))
+            Text(label, style = MaterialTheme.typography.titleMedium, color = ink)
+            Text(note, style = MaterialTheme.typography.bodyMedium, color = ink.copy(alpha = 0.75f))
         }
     }
 }
@@ -430,7 +443,7 @@ private fun ToolkitCard(group: SkillGroup, index: Int, modifier: Modifier = Modi
         )
         Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
             Text(group.title, style = MaterialTheme.typography.headlineSmallEmphasized, color = ink)
-            FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            PillFlow {
                 group.skills.forEachIndexed { i, skill ->
                     val solid = i < 3
                     Text(
